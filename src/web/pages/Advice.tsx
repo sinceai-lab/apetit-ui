@@ -90,6 +90,7 @@ function AdviceBody({ d }: { d: InsightsAdvice }) {
           </div>
         )}
       </InsightPanel>
+      <EuroExposure region={d.region} crop={d.crop} />
 
       <Panel title={`What to do, ${label(d.story)}`} subtitle="Suggested actions for advisors, each with the evidence behind it">
         <ActionList actions={d.actions} note={d.actionsNote} askAbout={`${cropLabel(d.crop).toLowerCase()} in ${regionName(d.region)} under the ${label(d.story)} climate story (2041–2060)`} />
@@ -153,7 +154,6 @@ function AdviceBody({ d }: { d: InsightsAdvice }) {
       </Panel>
 
       <SoilEffects region={d.region} crop={d.crop} />
-      <EuroExposure region={d.region} crop={d.crop} />
     </div>
   );
 }

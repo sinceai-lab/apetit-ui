@@ -97,7 +97,7 @@ export function OutlookPage({ query }: PageProps) {
 function Forecast({ region, crop, showRegion }: { region: Region; crop: Crop; showRegion: boolean }) {
   const o = useOutlook(region, crop);
   return (
-    <InsightPanel emphasizeYears title={`${showRegion ? regionName(region) + ", " + cropLabel(crop).toLowerCase() : cropLabel(crop)}: forecast against the package baseline`} basis={o.data?.basis ?? null}>
+    <InsightPanel emphasizeYears title={`${showRegion ? regionName(region) + ", " + cropLabel(crop).toLowerCase() : cropLabel(crop)}: forecast against the baseline`} basis={o.data?.basis ?? null}>
       <InsightAsync state={o} height="h-64">
         {(d) => <ForecastBody d={d} />}
       </InsightAsync>
@@ -118,7 +118,7 @@ function ForecastBody({ d }: { d: InsightsOutlook }) {
           <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
             <li className="flex items-center gap-1.5"><span aria-hidden className="inline-block h-0.5 w-3 bg-[var(--muted)]" />Past actual (all farms)</li>
             <li className="flex items-center gap-1.5"><span aria-hidden className="inline-block h-0.5 w-3 bg-brand" />Our model</li>
-            <li className="flex items-center gap-1.5"><span aria-hidden className="inline-block w-3 border-t-2 border-dashed border-[var(--muted)]" />Baseline (package method)</li>
+            <li className="flex items-center gap-1.5"><span aria-hidden className="inline-block w-3 border-t-2 border-dashed border-[var(--muted)]" />Baseline</li>
           </ul>
         }
         table={{
