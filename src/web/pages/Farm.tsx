@@ -11,6 +11,7 @@ import { useApi } from "../lib/usePoll";
 import { CellWeather } from "./farm/CellWeather";
 import { ClimateOutlook } from "./farm/climate/ClimateOutlook";
 import { FarmFinder } from "./farm/FarmFinder";
+import { FarmFootprint } from "./farm/Footprint";
 import { FarmMiniMap } from "./farm/FarmMiniMap";
 import { LandUse } from "./farm/LandUse";
 import { ParcelHistory } from "./farm/ParcelHistory";
@@ -132,6 +133,8 @@ function FarmDetail({ farmId }: { farmId: string }) {
         <EmptyState title="No live estimate for this farm">None of its parcels has an Apetit contract crop the yield model covers this season.</EmptyState>
       )}
 
+      <FarmFootprint farm={farm} />
+
       <ClimateOutlook farm={farm} />
 
       <div className="grid gap-5 lg:grid-cols-2">
@@ -225,7 +228,7 @@ const EXTRA_LABEL: Record<string, string> = {
   catch_crop_share: "Catch crop share",
   soil_type_reported: "Soil (reported)",
   fertiliser_product: "Fertiliser",
-  carbon_footprint_kgco2e_per_kg: "Carbon footprint (kg CO₂e/kg)",
+  carbon_footprint_kgco2e_per_kg: "Current calculator footprint (kg CO₂e/kg)",
   survey_id: "Survey",
 };
 

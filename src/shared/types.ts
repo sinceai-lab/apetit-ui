@@ -250,6 +250,30 @@ export interface ServicesResponse { services: ServiceStatus[]; pipeline: Pipelin
 export interface OverviewResponse extends Envelope { counts: Counts; season: SeasonInfo; kpis: CropSummary[]; pipeline: Pipeline; source: PredictionSource | null }
 export interface TypesResponse extends Envelope { types: { type: string; count: number | null }[] }
 export interface FarmsResponse extends Envelope { farms: Farm[] }
+/** One farm, crop and year of the derived FarmFootprint load (cradle to farm gate, kg CO2e/ha by source). */
+export interface FootprintRow {
+  crop: string;
+  year: number;
+  method: "survey" | "foodhills";
+  areaHa: number;
+  yieldTHa: number;
+  organicShare: number;
+  fertiliserKgHa: number;
+  n2oDirectKgHa: number;
+  n2oIndirectKgHa: number;
+  dieselKgHa: number;
+  limeKgHa: number;
+  spraysKgHa: number;
+  electricityKgHa: number;
+  organicSoilKgHa: number;
+  totalKgHa: number;
+  flagKgHa: number;
+  kgPerKg: number;
+  mineralOnlyKgPerKg: number;
+  currentCalcKgPerKg: number | null;
+  farmTco2e: number;
+}
+export interface FarmFootprintResponse extends Envelope { farmId: string; rows: FootprintRow[] }
 export interface FarmDetailResponse extends Envelope { farm: Farm; parcels: Parcel[]; predictions: Prediction[]; cell: Cell | null }
 export interface ParcelsResponse extends Envelope { parcels: Parcel[] }
 export interface ParcelsMinResponse extends Envelope { parcels: ParcelMin[] }

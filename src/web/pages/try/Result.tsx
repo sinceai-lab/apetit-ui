@@ -11,7 +11,7 @@ import { featureLabel, IRRIGATION_SHORT, parcelShort, soilLabel, WEATHER_SHORT }
 
 const fmtVal = (v: number, field = "") => (field === "year" || field.endsWith("_doy") ? String(v) : Math.abs(v) >= 100 ? fmtNum(v) : fmtFixed(v, 2));
 
-export function WhatIfResult({ data, body, stale, onPin, pinned }: { data: WhatIfResponse; body: WhatIfBody; stale: boolean; onPin?: () => void; pinned?: boolean }) {
+export function WhatIfResult({ data, body, onPin, pinned }: { data: WhatIfResponse; body: WhatIfBody; onPin?: () => void; pinned?: boolean }) {
   const dark = useIsDark();
   const p = data.prediction;
   const oor = p.outOfTrainingRange ?? [];
@@ -43,7 +43,6 @@ export function WhatIfResult({ data, body, stale, onPin, pinned }: { data: WhatI
           </span>
         </div>
         <StaleNotice basis={data.basis} className="mb-3" />
-        {stale && <Notice className="mb-3">The pickers have changed since this run. Press Run to update the result.</Notice>}
 
         <div className="grid gap-5 sm:grid-cols-3">
           <Stat

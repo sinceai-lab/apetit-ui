@@ -78,7 +78,7 @@ export function normalizeFarm(e: Raw): Farm {
   const farmId = String(e.farm_id ?? urnTail(e.id));
   const perCrop: Farm["perCrop"] = {};
   for (const [attr, val] of Object.entries(e)) {
-    if (FARM_SCALARS.has(attr) || !val || typeof val !== "object" || Array.isArray(val)) continue;
+    if (FARM_SCALARS.has(attr) || attr.startsWith("fp_") || !val || typeof val !== "object" || Array.isArray(val)) continue;
     for (const [cropKey, v] of Object.entries(val as Raw)) {
       const crop = normCrop(cropKey);
       (perCrop[crop] ??= {})[attr] = normValue(v);

@@ -1,5 +1,5 @@
 // Read-only Coraine broker access (GET only) with paging and the server-side cache.
-import type { Cell, ClimateAttr, Farm, Parcel, Region, SubscriptionRow, LoadLogRow } from "../shared/types";
+import type { Cell, ClimateAttr, Farm, FootprintRow, Parcel, Region, SubscriptionRow, LoadLogRow } from "../shared/types";
 import { normalizeCell, normalizeFarm, normalizeParcel } from "../shared/normalize";
 import { ngsi } from "./config";
 import { cache, TTL, type Cached } from "./cache";
@@ -102,6 +102,43 @@ export function getClimate(cellId: string, attrs: ClimateAttr[], from: string, t
       20_000,
     );
     return shapeClimate(t, attrs);
+  });
+}
+
+// FarmFootprint observations on Farm: one temporal instance per year, each value keyed by crop.
+const FP_ATTRS: Record<Exclude<keyof FootprintRow, "crop" | "year">, string> = {
+  method: "fp_method", areaHa: "fp_area_ha", yieldTHa: "fp_yield_t_ha", organicShare: "fp_organic_share",
+  fertiliserKgHa: "fp_fertiliser_kg_ha", n2oDirectKgHa: "fp_n2o_direct_kg_ha", n2oIndirectKgHa: "fp_n2o_indirect_kg_ha",
+  dieselKgHa: "fp_diesel_kg_ha", limeKgHa: "fp_lime_kg_ha", spraysKgHa: "fp_sprays_kg_ha", electricityKgHa: "fp_electricity_kg_ha",
+  organicSoilKgHa: "fp_organic_soil_kg_ha", totalKgHa: "fp_total_kg_ha", flagKgHa: "fp_flag_kg_ha", kgPerKg: "fp_kgco2e_per_kg",
+  mineralOnlyKgPerKg: "fp_mineral_only_kgco2e_per_kg", currentCalcKgPerKg: "fp_current_calc_kgco2e_per_kg", farmTco2e: "fp_farm_tco2e",
+};
+
+export function getFarmFootprint(farmId: string): Promise<Cached<FootprintRow[]>> {
+  return cache.get(`footprint:${farmId}`, TTL.master, async () => {
+    let t: Raw;
+    try {
+      t = await brokerJson(
+        `/temporal/entities/${encodeURIComponent(`urn:ngsi-ld:Farm:${farmId}`)}`,
+        { attrs: Object.values(FP_ATTRS).join(","), options: "temporalValues", timerel: "after", timeAt: "1900-01-01T00:00:00Z" },
+        15_000,
+      );
+    } catch (e) {
+      if ((e as { status?: number }).status === 404) return [];
+      throw e;
+    }
+    const rows = new Map<string, Record<string, unknown>>();
+    for (const [key, attr] of Object.entries(FP_ATTRS)) {
+      for (const [val, at] of (t[attr]?.values ?? []) as [Record<string, unknown>, string][]) {
+        const year = Number(String(at).slice(0, 4));
+        for (const [crop, v] of Object.entries(val ?? {})) {
+          const r = rows.get(`${crop}|${year}`) ?? { crop, year, currentCalcKgPerKg: null };
+          r[key] = v;
+          rows.set(`${crop}|${year}`, r);
+        }
+      }
+    }
+    return [...rows.values()].filter((r) => typeof r.totalKgHa === "number").sort((a, b) => String(a.crop).localeCompare(String(b.crop)) || Number(a.year) - Number(b.year)) as unknown as FootprintRow[];
   });
 }
 

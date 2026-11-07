@@ -5,6 +5,7 @@ import type {
   ClimateResponse,
   EntityResponse,
   FarmDetailResponse,
+  FarmFootprintResponse,
   FarmsResponse,
   HistoryResponse,
   LiveHealthResponse,
@@ -62,6 +63,7 @@ export const api = {
   types: (s?: S) => getJson<TypesResponse>("/api/broker/types", undefined, s),
   farms: (region?: RegionFilter, s?: S) => getJson<FarmsResponse>("/api/broker/farms", { region }, s),
   farm: (farmId: string, s?: S) => getJson<FarmDetailResponse>(`/api/broker/farms/${encodeURIComponent(farmId)}`, undefined, s),
+  farmFootprint: (farmId: string, s?: S) => getJson<FarmFootprintResponse>(`/api/broker/farms/${encodeURIComponent(farmId)}/footprint`, undefined, s),
   parcels: (q: { region?: RegionFilter; crop?: string; farm?: string } = {}, s?: S) => getJson<ParcelsResponse>("/api/broker/parcels", q, s),
   parcelsMin: (q: { region?: RegionFilter; crop?: string; farm?: string } = {}, s?: S) =>
     getJson<ParcelsMinResponse>("/api/broker/parcels", { ...q, fields: "min" }, s),

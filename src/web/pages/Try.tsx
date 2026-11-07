@@ -1,5 +1,5 @@
 // Try the model: run the trained model for one field, crop, weather set and season (contract §10.3). Builder B.
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Play } from "lucide-react";
 import type { Crop } from "@/shared/types";
 import { IRRIGATIONS, WEATHER_SETS, type Irrigation, type WeatherSet, type WhatIfBody } from "@/shared/insights";
@@ -11,7 +11,7 @@ import { useRegion } from "../lib/prefs";
 import { setQuery } from "../lib/router";
 import { Notice, pickRegion, RegionPicker, Select } from "./try/common";
 import { WhatIfResult } from "./try/Result";
-import { ComparePanel, isFutureYear, MAX_RUNS, runKey, useStoryRuns, type Run } from "./try/Compare";
+import { ComparePanel, isFutureYear, runKey, useComparison } from "./try/Compare";
 import { IRRIGATION_SHORT, parcelShort, soilLabel } from "./try/labels";
 
 const isWeather = (w: string | null): w is WeatherSet => !!w && w in WEATHER_SETS;
@@ -58,9 +58,8 @@ export function TryPage({ query }: PageProps) {
 
   const body: WhatIfBody | null = parcel && crop ? { parcelId: parcel.parcelId, crop, weather, year, irrigation } : null;
   const whatIf = useWhatIf();
-  const [runs, setRuns] = useState<Run[]>([]);
-  const addRuns = useCallback((rs: Run[]) => setRuns((cur) => [...cur.filter((c) => !rs.some((r) => r.key === c.key)), ...rs].slice(-MAX_RUNS)), []);
-  const story = useStoryRuns(addRuns);
+  const cmp = useComparison();
+  const bodyKey = body ? runKey(body) : null;
 
   // A shared link (e.g. from Farm, "Try this field") runs once on arrival; picker changes never do.
   const autoRan = useRef(false);
@@ -70,7 +69,12 @@ export function TryPage({ query }: PageProps) {
     whatIf.run(body);
   }, [body, qParcel]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const changed = !!(whatIf.body && body && runKey(whatIf.body) !== runKey(body));
+  // A result belongs to the picks it was run with: once the pickers move away, clear it (and cancel a run in flight).
+  const { reset, body: ranBody } = whatIf;
+  useEffect(() => {
+    if (ranBody && runKey(ranBody) !== bodyKey) reset();
+  }, [bodyKey, ranBody, reset]);
+  const current = !!(whatIf.body && bodyKey && runKey(whatIf.body) === bodyKey);
   const storyYear = isFutureYear(year) ? year : 2050;
   const irrHelp = base.data?.irrigationNote;
   const irrOptions = (base.data?.irrigation ?? IRRIGATIONS.map((c) => ({ code: c, label: IRRIGATION_SHORT[c], regions: ["SE_SKANE"] }))).filter((o) => region === "SE_SKANE" || o.code === "usual");
@@ -131,21 +135,20 @@ export function TryPage({ query }: PageProps) {
             <Play className="size-4" aria-hidden />
             {whatIf.loading ? "Running…" : "Run"}
           </button>
-          <span className="text-xs text-muted">Changing a picker doesn't run the model on its own. Press Run when ready.</span>
+          <span className="text-xs text-muted">Changing a picker clears the result. Press Run when ready.</span>
         </div>
         {farmOpts.loading && farm && !parcels.length && <Loading label="Loading fields…" className="py-2" />}
         {cropOpts.data && crop && !farms.length && <EmptyState className="mt-3" title="No farm grows this crop in the model data" />}
       </Card>
 
-      {whatIf.error ? (
+      {whatIf.error && current ? (
         <ErrorState error={whatIfMessage(whatIf.error)} onRetry={body ? () => whatIf.run(body) : undefined} />
-      ) : whatIf.data && whatIf.body ? (
+      ) : whatIf.data && whatIf.body && current ? (
         <WhatIfResult
           data={whatIf.data}
           body={whatIf.body}
-          stale={changed}
-          pinned={runs.some((r) => r.key === runKey(whatIf.body!))}
-          onPin={() => addRuns([{ key: runKey(whatIf.body!), body: whatIf.body!, data: whatIf.data! }])}
+          pinned={cmp.queries.some((q) => runKey(q) === runKey(whatIf.body!))}
+          onPin={() => cmp.addRun({ key: runKey(whatIf.body!), body: whatIf.body!, data: whatIf.data! })}
         />
       ) : whatIf.loading ? (
         <Skeleton className="h-64" />
@@ -153,15 +156,7 @@ export function TryPage({ query }: PageProps) {
         <EmptyState title="No run yet">Choose a field and a season's weather above, then press Run.</EmptyState>
       )}
 
-      <ComparePanel
-        runs={runs}
-        onRemove={(k) => setRuns((r) => r.filter((x) => x.key !== k))}
-        onClear={() => setRuns([])}
-        storyRuns={story}
-        canRunStories={!!body}
-        storyYear={storyYear}
-        onRunStories={() => body && story.run({ parcelId: body.parcelId, crop: body.crop, irrigation: body.irrigation }, storyYear)}
-      />
+      <ComparePanel cmp={cmp} current={body} availableSets={base.data?.weatherSets ?? []} storyYear={storyYear} />
 
       <Notice>What-if results come from the trained model for a chosen weather set. They are scenario results, kept apart from the live in-season estimates on Overview and Live season. Finland and Sweden are separate operations.</Notice>
     </div>

@@ -67,6 +67,12 @@
   --viz-filled-ahead: var(--border);
   --viz-grid: #e7ece3;
   --viz-axis: #a9b5a5;
+  /* Footprint sources, in stacking order (validated categorical, light surface). */
+  --viz-src-organic: #eb6834;
+  --viz-src-n2o: #2a78d6;
+  --viz-src-lime: #eda100;
+  --viz-src-fert: #6250d6;
+  --viz-src-energy: #1baf7a;
 
   --font-sans: "Heebo", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-title: "Lexend", "Heebo", ui-sans-serif, system-ui, sans-serif;
@@ -114,6 +120,11 @@
   --viz-neutral: #3a3a33;
   --viz-grid: #283027;
   --viz-axis: #4d584b;
+  --viz-src-organic: #d95926;
+  --viz-src-n2o: #3987e5;
+  --viz-src-lime: #c98500;
+  --viz-src-fert: #9085e9;
+  --viz-src-energy: #199e70;
 }
 
 /* Squarer corners like apetit.com (Bootstrap .25rem-5px) for every rounded-lg/xl/2xl in the app. */

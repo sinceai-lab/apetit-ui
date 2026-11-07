@@ -90,6 +90,8 @@ export const useCorrections = () => useApi((s) => insightsApi.corrections(s), []
 
 export interface WhatIfState extends Omit<AsyncState<WhatIfResponse>, "refresh" | "updatedAt"> {
   run: (body: WhatIfBody) => void;
+  /** Drop the result (and cancel a run in flight), e.g. when the pickers change. */
+  reset: () => void;
   body: WhatIfBody | null;
 }
 
@@ -110,7 +112,12 @@ export function useWhatIf(): WhatIfState {
         setState({ data: null, error: e instanceof ApiError ? e : new ApiError(0, String(e?.message ?? e)), loading: false, body });
       });
   }, []);
-  return { ...state, run };
+  const reset = useCallback(() => {
+    ac.current?.abort();
+    ac.current = null;
+    setState({ data: null, error: null, loading: false, body: null });
+  }, []);
+  return { ...state, run, reset };
 }
 
 /** "Scenario result · model 5cf88f33 · file 7 Nov 2026": the chip text next to an insight panel's title. */

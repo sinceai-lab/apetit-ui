@@ -5,7 +5,7 @@ import { CLIMATE_ATTRS } from "../shared/types";
 import { cropSummaries, filterPredictions, latestAsOf } from "../shared/aggregate";
 import { cache, type Cached } from "./cache";
 import { errMsg, errorResponse, HttpError, json, nowIso } from "./http";
-import { getCells, getClimate, getEntity, getFarms, getLoadLogs, getParcels, getSubscriptions, getTypeCounts, getWeather } from "./broker";
+import { getCells, getClimate, getEntity, getFarmFootprint, getFarms, getLoadLogs, getParcels, getSubscriptions, getTypeCounts, getWeather } from "./broker";
 import { getHistory, getLiveHealth, getObservations, getPredictions } from "./live";
 import { getServices } from "./services";
 import { buildPipeline, countsFrom, seasonInfo, stripKeys } from "./shape";
@@ -143,6 +143,15 @@ export const routes: Route[] = [
         cell,
         ...(Object.keys(errors).length ? { errors } : {}),
       });
+    },
+  },
+  {
+    method: "GET",
+    pattern: "/api/broker/farms/:farmId/footprint",
+    handler: async ({ params }) => {
+      const farmId = pathId(params.farmId, RX.farmId, "farmId");
+      const c = await getFarmFootprint(farmId);
+      return json({ ...envelope(c), farmId, rows: c.value });
     },
   },
   {
