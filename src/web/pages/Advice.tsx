@@ -91,7 +91,7 @@ function AdviceBody({ d }: { d: InsightsAdvice }) {
         )}
       </InsightPanel>
 
-      <Panel title={`What to do (draft), ${label(d.story)}`} subtitle="Suggested actions for advisors, each with the evidence behind it">
+      <Panel title={`What to do, ${label(d.story)}`} subtitle="Suggested actions for advisors, each with the evidence behind it">
         <ActionList actions={d.actions} note={d.actionsNote} askAbout={`${cropLabel(d.crop).toLowerCase()} in ${regionName(d.region)} under the ${label(d.story)} climate story (2041–2060)`} />
       </Panel>
 
