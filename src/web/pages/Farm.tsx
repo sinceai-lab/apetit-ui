@@ -33,7 +33,7 @@ function FarmDetail({ farmId }: { farmId: string }) {
           <PageHeader title={`Farm ${farmId}`} />
           <EmptyState title={`We could not find farm ${farmId}`}>
             Farm ids look like F0001 (Finland) or S0381 (Sweden).{" "}
-            <a className="font-medium text-brand underline" href={href("/farm")}>
+            <a className="link" href={href("/farm")}>
               Search all farms
             </a>
           </EmptyState>
@@ -62,7 +62,7 @@ function FarmDetail({ farmId }: { farmId: string }) {
 
   return (
     <div className="flex flex-col gap-5">
-      <a href={href("/season")} className="inline-flex w-fit items-center gap-1 text-sm text-muted hover:text-ink">
+      <a href={href("/season")} className="inline-flex w-fit items-center gap-1 text-sm text-muted transition-colors hover:text-brand">
         <ArrowLeft className="size-4" aria-hidden /> Live season
       </a>
       <PageHeader
@@ -236,7 +236,7 @@ function ContractFacts({ farm }: { farm: Farm }) {
             const extra = Object.entries(facts).filter(([k]) => !FACTS.some((f) => f.key === k) && k !== "calculator_note");
             return (
               <div key={crop}>
-                <div className="mb-2 inline-flex items-center gap-1.5 text-sm font-semibold text-ink">
+                <div className="mb-2 inline-flex items-center gap-1.5 font-heading text-sm font-semibold text-heading">
                   <CropDot crop={crop} /> {cropLabel(crop)}
                 </div>
                 <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -249,7 +249,7 @@ function ContractFacts({ farm }: { farm: Farm }) {
                 </dl>
                 {extra.length > 0 && (
                   <details className="mt-2">
-                    <summary className="cursor-pointer text-[13px] font-medium text-brand">More survey details ({extra.length})</summary>
+                    <summary className="cursor-pointer text-[13px] font-medium text-brand hover:text-brand-strong">More survey details ({extra.length})</summary>
                     <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
                       {extra.map(([k, v]) => (
                         <div key={k} className="contents">

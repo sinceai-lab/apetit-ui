@@ -38,9 +38,9 @@ export function ProvenancePanel({ loadLogs }: { loadLogs: LoadLogRow[] }) {
       <ol className="grid gap-2 sm:grid-cols-4">
         {STEPS.map((s, i) => (
           <li key={s.title} className="relative flex gap-2.5 rounded-lg bg-surface-2 p-3">
-            <s.icon className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />
+            <s.icon className="mt-0.5 size-4 shrink-0 text-brand-vivid" aria-hidden />
             <div>
-              <div className="text-sm font-medium text-ink">{s.title}</div>
+              <div className="font-heading text-sm font-bold text-heading">{s.title}</div>
               <div className="text-xs text-muted">{s.text}</div>
             </div>
             {i < STEPS.length - 1 && <ArrowRight aria-hidden className="absolute -right-2.5 top-1/2 hidden size-4 -translate-y-1/2 text-muted sm:block" />}
@@ -84,7 +84,7 @@ function Trace({ id, loadLogs }: { id: string; loadLogs: LoadLogRow[] }) {
               <div className="break-all font-mono text-xs text-ink">{e.id}</div>
             </div>
             <div>
-              <h3 className="mb-1.5 font-medium text-ink">Loaded from {logs.length === 1 ? "1 file" : `${fmtNum(logs.length)} files`}</h3>
+              <h3 className="mb-1.5 font-heading font-bold text-heading">Loaded from {logs.length === 1 ? "1 file" : `${fmtNum(logs.length)} files`}</h3>
               <ul className="space-y-2">
                 {logs.map((lid) => {
                   const l = byId.get(lid);
@@ -92,7 +92,7 @@ function Trace({ id, loadLogs }: { id: string; loadLogs: LoadLogRow[] }) {
                   return (
                     <li key={lid} className="rounded-lg border border-border p-2.5">
                       <div className="flex items-center gap-2">
-                        <FileText className="size-4 text-brand" aria-hidden />
+                        <FileText className="size-4 text-brand-vivid" aria-hidden />
                         <span className="font-medium text-ink">{l?.file ?? "unknown file"}</span>
                         <span className="ml-auto text-xs text-muted">{n} attributes</span>
                       </div>
@@ -109,7 +109,7 @@ function Trace({ id, loadLogs }: { id: string; loadLogs: LoadLogRow[] }) {
               </ul>
             </div>
             <div>
-              <h3 className="mb-1.5 font-medium text-ink">Attributes</h3>
+              <h3 className="mb-1.5 font-heading font-bold text-heading">Attributes</h3>
               <div className="overflow-x-auto rounded-lg border border-border">
                 <table className="w-full text-xs">
                   <thead className="bg-surface-2 text-left text-muted">

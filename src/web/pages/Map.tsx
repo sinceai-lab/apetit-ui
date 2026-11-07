@@ -10,7 +10,7 @@ import { cropLabel, fmtDate, fmtHa, fmtNum, fmtTHa, regionLabel } from "../lib/f
 import { useRegion } from "../lib/prefs";
 import { href, setQuery } from "../lib/router";
 import { POLL, useApi } from "../lib/usePoll";
-import { boundsOf, L, useLeaflet } from "./map/useLeaflet";
+import { boundsOf, L, mapInk, useLeaflet } from "./map/useLeaflet";
 import { CropDot, Delta, LiveNote, regionFlag, weightedDelta } from "./season/common";
 
 type Sel = { kind: "parcel" | "farm" | "cell"; id: string } | null;
@@ -63,7 +63,7 @@ export function MapPage({ query }: PageProps) {
           [lat - 0.125, lon - 0.125],
           [lat + 0.125, lon + 0.125],
         ],
-        { renderer, weight: 1, color: dark ? "#4A5244" : "#B9B09A", fillColor: ps ? deltaColor(d, dark) : dark ? "#2A2F26" : "#F3EEE2", fillOpacity: ps ? 0.42 : 0.25 },
+        { renderer, weight: 1, color: mapInk(dark).grid, fillColor: ps ? deltaColor(d, dark) : mapInk(dark).empty, fillOpacity: ps ? 0.42 : 0.25 },
       )
         .on("click", () => setSel({ kind: "cell", id: c.cellId }))
         .addTo(g);
@@ -79,7 +79,7 @@ export function MapPage({ query }: PageProps) {
     const g = L.layerGroup();
     for (const p of parcels.data.parcels) {
       if (predByParcel.has(p[0])) continue;
-      L.circleMarker([p[5], p[4]], { renderer, radius: 2, weight: 0, fillOpacity: 0.55, fillColor: dark ? "#8A8678" : "#9C9684" })
+      L.circleMarker([p[5], p[4]], { renderer, radius: 2, weight: 0, fillOpacity: 0.55, fillColor: mapInk(dark).other })
         .on("click", () => setSel({ kind: "parcel", id: p[0] }))
         .addTo(g);
     }
@@ -96,7 +96,7 @@ export function MapPage({ query }: PageProps) {
       const loc = parcelById.get(pid);
       if (!loc) continue;
       const d = ps[0]!.deltaPct;
-      L.circleMarker([loc[5], loc[4]], { renderer, radius: 4.5, weight: 1, color: dark ? "#121510" : "#FFFFFF", fillOpacity: 0.95, fillColor: deltaColor(d, dark) })
+      L.circleMarker([loc[5], loc[4]], { renderer, radius: 4.5, weight: 1, color: mapInk(dark).surface, fillOpacity: 0.95, fillColor: deltaColor(d, dark) })
         .on("click", () => setSel({ kind: "parcel", id: pid }))
         .addTo(g);
     }
@@ -111,7 +111,7 @@ export function MapPage({ query }: PageProps) {
     const g = L.layerGroup();
     for (const f of farms.data.farms) {
       const [lon, lat] = f.location;
-      L.circleMarker([lat, lon], { renderer, radius: 6, weight: 2.5, color: dark ? "#8CC08A" : "#2F5D31", fillColor: dark ? "#1A1F17" : "#FFFFFF", fillOpacity: 1 })
+      L.circleMarker([lat, lon], { renderer, radius: 6, weight: 2.5, color: mapInk(dark).brand, fillColor: mapInk(dark).surface, fillOpacity: 1 })
         .on("click", () => setSel({ kind: "farm", id: f.farmId }))
         .addTo(g);
     }
@@ -147,8 +147,8 @@ export function MapPage({ query }: PageProps) {
         <Card className="relative isolate overflow-hidden">
           <div ref={ref} className="h-[62dvh] min-h-[380px] w-full" role="region" aria-label="Map of farms, parcels and weather cells" />
           <div className="pointer-events-none absolute inset-x-2 top-2 z-[500] flex flex-wrap justify-end gap-1.5">
-            {loading && <span className="pointer-events-auto rounded-full bg-surface px-3 py-1 text-xs text-muted shadow-card">Loading map data…</span>}
-            {tilesFailed && layers.basemap && <span className="pointer-events-auto rounded-full bg-rapeseed-soft px-3 py-1 text-xs text-ink shadow-card">Basemap unavailable, data still shown</span>}
+            {loading && <span className="pointer-events-auto rounded-card border border-border bg-surface px-3 py-1 text-xs text-muted">Loading map data…</span>}
+            {tilesFailed && layers.basemap && <span className="pointer-events-auto rounded-card bg-rapeseed-soft px-3 py-1 text-xs text-ink">Basemap unavailable, data still shown</span>}
           </div>
         </Card>
 
@@ -158,7 +158,7 @@ export function MapPage({ query }: PageProps) {
               <SelectionPanel sel={sel} onClose={() => setSel(null)} parcel={sel.kind === "parcel" ? parcelById.get(sel.id) : undefined} preds={preds.data?.predictions ?? []} cells={cells.data?.cells ?? []} farms={farms.data?.farms ?? []} />
             ) : (
               <div className="flex items-start gap-2 text-sm text-muted">
-                <MousePointerClick className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />
+                <MousePointerClick className="mt-0.5 size-4 shrink-0 text-brand-vivid" aria-hidden />
                 <div>
                   <div className="font-medium text-ink">Click a parcel, farm or grid square</div>
                   <div className="tnum mt-0.5">
@@ -171,8 +171,8 @@ export function MapPage({ query }: PageProps) {
           </Card>
 
           <Card className="p-4">
-            <h2 className="mb-2 inline-flex items-center gap-1.5 text-sm font-semibold text-ink">
-              <Layers className="size-4 text-brand" aria-hidden />
+            <h2 className="mb-2 inline-flex items-center gap-1.5 text-sm font-semibold text-heading">
+              <Layers className="size-4 text-brand-vivid" aria-hidden />
               Layers
             </h2>
             <div className="flex flex-col gap-1.5 text-sm">
@@ -219,8 +219,8 @@ function SelectionPanel({ sel, onClose, parcel, preds, cells, farms }: { sel: No
   const header = (title: string, sub: string) => (
     <div className="mb-3 flex items-start justify-between gap-2">
       <div>
-        <div className="text-xs font-medium uppercase tracking-wide text-muted">{sub}</div>
-        <h2 className="font-display text-xl font-bold text-ink">{title}</h2>
+        <div className="eyebrow">{sub}</div>
+        <h2 className="text-xl font-bold text-heading">{title}</h2>
       </div>
       <Button variant="ghost" aria-label="Clear selection" onClick={onClose}>
         <X className="size-4" />
@@ -237,7 +237,7 @@ function SelectionPanel({ sel, onClose, parcel, preds, cells, farms }: { sel: No
         <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
           <dt className="text-muted">Farm</dt>
           <dd>
-            <a className="font-medium text-brand hover:underline" href={href(`/farm/${farmId}`)}>
+            <a className="link" href={href(`/farm/${farmId}`)}>
               {farmId}
             </a>
           </dd>
@@ -294,7 +294,7 @@ function SelectionPanel({ sel, onClose, parcel, preds, cells, farms }: { sel: No
         {f?.contractCrops.length ? (
           <div className="mt-2 flex flex-wrap gap-1.5">
             {f.contractCrops.map((c) => (
-              <span key={c} className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.5 text-xs">
+              <span key={c} className="inline-flex items-center gap-1 rounded bg-surface-2 px-2 py-0.5 text-xs">
                 <CropDot crop={c} className="size-2" />
                 {cropLabel(c)}
               </span>

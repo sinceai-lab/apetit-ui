@@ -165,7 +165,7 @@ export function AssistantPage(_: PageProps) {
             <AMark className="size-8 sm:size-10" />
           </span>
           <div className="min-w-0">
-            <div className="eyebrow">Field Navigator · AI</div>
+            <div className="eyebrow">Farm insights · AI</div>
             <h1 className="font-title text-2xl font-semibold leading-tight text-heading sm:text-[32px]">Apetit assistant</h1>
             <p className="mt-1 max-w-3xl text-[15px] text-muted">Ask questions in plain language. The assistant looks things up in the live farm data for you.</p>
           </div>
@@ -252,7 +252,7 @@ export function AssistantPage(_: PageProps) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKey}
-              placeholder={botDown ? "The chat-bot is offline" : "Ask about farms, yields or weather…"}
+              placeholder={botDown ? "The chat-bot is offline" : "Ask about the farm data…"}
               disabled={botDown}
               className="field max-h-40 min-h-[46px] flex-1 resize-y px-3.5 py-2.5 text-[15px] placeholder:text-muted disabled:opacity-60"
             />
@@ -297,7 +297,7 @@ function groupTurns(turns: Turn[]): Group[] {
 
 function Avatar({ who }: { who: "user" | "bot" }) {
   return (
-    <span aria-hidden className={cn("mt-0.5 grid size-9 shrink-0 place-items-center rounded-full border", who === "user" ? "border-border bg-surface-2 text-muted" : "border-border bg-surface")}>
+    <span aria-hidden className={cn("mt-0.5 grid size-9 shrink-0 place-items-center rounded-card border", who === "user" ? "border-border bg-surface-2 text-muted" : "border-border bg-surface")}>
       {who === "user" ? <User className="size-4" /> : <AMark className="size-6" />}
     </span>
   );
@@ -308,7 +308,7 @@ function TurnView({ turn }: { turn: Turn }) {
     return (
       <div className="flex flex-row-reverse items-start gap-2">
         <Avatar who="user" />
-        <div className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-tr-[2px] bg-brand px-4 py-2.5 text-[15px] leading-relaxed text-brand-contrast">
+        <div className="max-w-[85%] whitespace-pre-wrap rounded-card rounded-tr-[2px] bg-brand px-4 py-2.5 text-[15px] leading-relaxed text-brand-contrast">
           <span className="sr-only">You: </span>
           {turn.text}
         </div>
@@ -318,7 +318,7 @@ function TurnView({ turn }: { turn: Turn }) {
     return (
       <div className="flex items-start gap-2">
         <Avatar who="bot" />
-        <div className="min-w-0 max-w-[92%] rounded-2xl rounded-tl-[2px] border border-border bg-surface px-4 py-3 text-ink">
+        <div className="min-w-0 max-w-[92%] rounded-card rounded-tl-[2px] border border-border bg-surface px-4 py-3 text-ink">
           <span className="sr-only">Assistant: </span>
           <Markdown text={turn.text} />
           {!turn.done && <span aria-hidden className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-brand-vivid align-middle" />}

@@ -20,7 +20,7 @@ export function CellPicker({ cells, selected, parcels, onPick }: { cells: Cell[]
         <select
           value={selected ?? ""}
           onChange={(e) => onPick(e.target.value)}
-          className="mt-1 block w-full rounded-lg border border-border bg-surface px-2.5 py-2 text-sm text-ink"
+          className="field mt-1 block w-full px-2.5 py-2 text-sm"
         >
           {byRegion.map(([r, cs]) => (
             <optgroup key={r} label={regionLabel(r)}>
@@ -65,7 +65,7 @@ function MiniGrid({ region, cells, selected, parcels, max, onPick }: { region: R
   const sy = (lat: number) => h - ((lat - y0) / (y1 - y0)) * h;
   return (
     <div>
-      <div className="mb-1 text-xs font-medium text-muted">{regionLabel(region)}</div>
+      <div className="eyebrow mb-1">{regionLabel(region)}</div>
       <div ref={ref} className="w-full">
         {w > 0 && (
           <svg width={w} height={h} role="group" aria-label={`${regionLabel(region)} grid cells`}>

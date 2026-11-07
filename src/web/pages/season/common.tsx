@@ -51,8 +51,8 @@ export const isEarlySeason = (asOf: string | null | undefined) => !!asOf && asOf
 export function LiveNote({ asOfDate, observed, total, filledAhead, className }: { asOfDate: string | null | undefined; observed?: number; total?: number; filledAhead?: number; className?: string }) {
   return (
     <span className={cn("flex flex-wrap items-center gap-x-1.5 text-xs text-muted", className)}>
-      <span className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2 py-0.5 font-medium text-brand-strong">
-        <span aria-hidden className="size-1.5 rounded-full bg-brand" />
+      <span className="inline-flex items-center gap-1 rounded bg-brand-soft px-2 py-0.5 font-medium text-brand-strong">
+        <span aria-hidden className="size-1.5 rounded-full bg-brand-vivid" />
         Live estimate
       </span>
       <span>data as of {fmtDate(asOfDate)}</span>

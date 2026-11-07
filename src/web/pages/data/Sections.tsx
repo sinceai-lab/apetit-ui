@@ -41,7 +41,7 @@ export function Subscriptions({ subs }: { subs: SubscriptionRow[] }) {
         return (
           <li key={s.id} className="rounded-lg border border-border p-3">
             <div className="flex items-start gap-2">
-              <Radio className="mt-0.5 size-4 text-brand" aria-hidden />
+              <Radio className="mt-0.5 size-4 text-brand-vivid" aria-hidden />
               <div className="min-w-0 flex-1">
                 <div className="font-medium text-ink">{subName(s.id)}</div>
                 <div className="truncate text-xs text-muted" title={s.description ?? s.id}>{s.description ?? s.id}</div>
@@ -89,7 +89,7 @@ export function InferenceCounters({ health, obs }: { health: LiveHealthResponse 
         {wb && <Badge tone={wb.has_error ? "berry" : "brand"}>write-back {wb.enabled ? "on" : "off"} · {fmtNum(wb.pending)} pending{wb.has_error ? " · error" : ""}</Badge>}
       </div>
       <div>
-        <h3 className="mb-1.5 text-sm font-medium text-ink">Recently rejected readings</h3>
+        <h3 className="mb-1.5 font-heading text-sm font-bold text-heading">Recently rejected readings</h3>
         {rejected.length ? (
           <ul className="relative max-h-56 space-y-1 overflow-y-auto rounded-lg border border-border p-2 font-mono text-xs">
             {rejected.slice(0, 50).map((r, i) => (
@@ -150,7 +150,7 @@ export function Completeness({ seasons, cells, kpis }: { seasons: ObservationSea
   const regions = useMemo(() => regionCoverage(seasons, cells), [seasons, cells]);
   const reg = useMemo(() => new Map(cells.map((c) => [c.cellId, c.region])), [cells]);
   const cols: Column<ObservationSeason>[] = [
-    { key: "c", header: "Cell", render: (s) => <a className="font-mono text-xs text-brand underline" href={`#/weather/${s.cell_id}`}>{s.cell_id}</a>, sortValue: (s) => s.cell_id },
+    { key: "c", header: "Cell", render: (s) => <a className="link font-mono text-xs" href={`#/weather/${s.cell_id}`}>{s.cell_id}</a>, sortValue: (s) => s.cell_id },
     { key: "r", header: "Region", render: (s) => { const r = reg.get(s.cell_id); return r ? regionLabel(r) : "–"; }, sortValue: (s) => reg.get(s.cell_id) ?? "" },
     { key: "p", header: "Contract parcels", align: "right", render: (s) => fmtNum(s.contract_parcels), sortValue: (s) => s.contract_parcels },
     { key: "o", header: "Observed", align: "right", render: (s) => `${fmtNum(s.observed_days)} / ${fmtNum(s.total_days)}`, sortValue: (s) => (s.total_days ? s.observed_days / s.total_days : 0) },
@@ -181,7 +181,7 @@ export function Completeness({ seasons, cells, kpis }: { seasons: ObservationSea
 
       {kpis.length > 0 && (
         <div>
-          <h3 className="mb-1.5 text-sm font-medium text-ink">Per crop (as used by the estimates)</h3>
+          <h3 className="mb-1.5 font-heading text-sm font-bold text-heading">Per crop (as used by the estimates)</h3>
           <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {kpis.map((k) => (
               <li key={`${k.region}-${k.crop}`} className="rounded-lg bg-surface-2 p-2.5" title={`YieldPrediction · model ${k.modelVersion.slice(0, 8)} · data as of ${fmtDate(k.asOfDate)}`}>
@@ -203,7 +203,7 @@ export function Completeness({ seasons, cells, kpis }: { seasons: ObservationSea
       )}
 
       <details className="group">
-        <summary className="cursor-pointer text-sm font-medium text-brand">All {seasons.length} grid cells</summary>
+        <summary className="link cursor-pointer text-sm">All {seasons.length} grid cells</summary>
         <div className="mt-2">
           <Table dense columns={cols} rows={seasons} rowKey={(s) => `${s.cell_id}-${s.year}`} maxHeight={420} initialSort={{ key: "p", dir: "desc" }} />
         </div>

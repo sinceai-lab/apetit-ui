@@ -147,7 +147,7 @@ function FarmDrill({ crop, rows, showRegion, farm }: { crop: Crop; rows: Predict
       key: "farm",
       header: "Farm",
       render: (f) => (
-        <a href={href(`/farm/${f.farmId}`)} onClick={(e) => e.stopPropagation()} className="font-medium text-brand hover:underline">
+        <a href={href(`/farm/${f.farmId}`)} onClick={(e) => e.stopPropagation()} className="link">
           {f.farmId}
         </a>
       ),
@@ -162,7 +162,7 @@ function FarmDrill({ crop, rows, showRegion, farm }: { crop: Crop; rows: Predict
     { key: "d", header: "Δ", align: "right", render: (f) => <Delta value={f.deltaPct} />, sortValue: (f) => f.deltaPct },
   ];
   return (
-    <div className={selected ? "grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]" : ""}>
+    <div className={selected ? "grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]" : ""}>
       <Panel title={`${cropLabel(crop)} farms`} subtitle={`${fmtNum(farms.length)} farms. Click a row to see its parcels, or the farm id for full details.`}>
         <Table
           dense

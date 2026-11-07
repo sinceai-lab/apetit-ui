@@ -31,7 +31,7 @@ export function SourceDrawer({ open, onClose, entities }: { open: boolean; onClo
     <Drawer open={open} onClose={onClose} title="Where this data comes from">
       <label className="mb-3 flex flex-col gap-1 text-sm">
         <span className="text-muted">Entity</span>
-        <select value={id} onChange={(e) => setId(e.target.value)} className="rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-ink">
+        <select value={id} onChange={(e) => setId(e.target.value)} className="field px-2 py-1.5 text-sm">
           {entities.map((e) => (
             <option key={e.id} value={e.id}>
               {e.label}
@@ -56,7 +56,7 @@ export function SourceDrawer({ open, onClose, entities }: { open: boolean; onClo
                     return (
                       <li key={logId} className="rounded-lg border border-border p-3 text-sm">
                         <div className="flex items-center gap-1.5 font-medium text-ink">
-                          <FileSpreadsheet className="size-4 text-brand" aria-hidden />
+                          <FileSpreadsheet className="size-4 text-brand-vivid" aria-hidden />
                           {l?.file ?? logId.split(":").pop()}
                         </div>
                         {l && (
@@ -74,12 +74,12 @@ export function SourceDrawer({ open, onClose, entities }: { open: boolean; onClo
               )}
               {refs.length > 0 && (
                 <details>
-                  <summary className="cursor-pointer text-sm font-medium text-brand">Attribute → LoadLog table</summary>
+                  <summary className="cursor-pointer text-sm font-medium text-brand hover:text-brand-strong">Attribute → LoadLog table</summary>
                   <Table dense className="mt-2" rows={refs} rowKey={(r) => r.attr} columns={[{ key: "a", header: "Attribute", render: (r) => <code>{r.attr}</code> }, { key: "l", header: "File", render: (r) => logById.get(r.loadLog)?.file ?? r.loadLog }]} />
                 </details>
               )}
               <details>
-                <summary className="cursor-pointer text-sm font-medium text-brand">Raw NGSI-LD entity</summary>
+                <summary className="cursor-pointer text-sm font-medium text-brand hover:text-brand-strong">Raw NGSI-LD entity</summary>
                 <div className="mt-2">
                   <JsonBlock value={e} />
                 </div>

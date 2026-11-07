@@ -421,7 +421,7 @@ Use client-side routing with the History API (Bun's `"/*": index` serves the SPA
 
 ## 7. Theme
 
-**No official Apetit brand colours or fonts were found.** The challenge brief PDF uses Since AI's black-and-magenta template (#EF1897), not Apetit's. The data package's START_HERE.html uses muted field greens (`#2f4f1f` headings, `#9bb27a` rules, `#1d2a1d` text, `#eef3e6` and `#f3f5f0` fills). This is therefore a **designed warm Nordic food palette** that takes its anchor green from the package: field green, rapeseed yellow, pea green, berry and oat neutrals. Don't copy any Apetit logo file. The brand is a **text wordmark "Apetit"** (weight 800, tracking -0.02em, colour `--brand`) followed by a small rapeseed-yellow dot and the product name "Field Navigator" in muted text.
+**No official Apetit brand colours or fonts were found.** The challenge brief PDF uses Since AI's black-and-magenta template (#EF1897), not Apetit's. The data package's START_HERE.html uses muted field greens (`#2f4f1f` headings, `#9bb27a` rules, `#1d2a1d` text, `#eef3e6` and `#f3f5f0` fills). This is therefore a **designed warm Nordic food palette** that takes its anchor green from the package: field green, rapeseed yellow, pea green, berry and oat neutrals. Don't copy any Apetit logo file. The brand is a **text wordmark "Apetit"** (weight 800, tracking -0.02em, colour `--brand`) followed by a small rapeseed-yellow dot and the product name "Farm insights" in muted text.
 
 ### 7.1 Tokens (CSS variables on `:root`, `.dark` overrides; Tailwind v4 `@theme inline` maps them like `../frontend/styles/globals.css`)
 

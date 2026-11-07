@@ -22,7 +22,7 @@ export function EmbedView({ id, service }: { id: EmbedId; service: ServiceStatus
           <ArrowLeft className="size-3.5" aria-hidden />
           All services
         </LinkButton>
-        <h2 className="font-display text-lg font-bold text-ink">{e.title}</h2>
+        <h2 className="font-display text-lg font-bold text-heading">{e.title}</h2>
         {service && <StatusBadge status={service.status} />}
         {open && (
           <LinkButton href={open} external className="ml-auto text-xs">

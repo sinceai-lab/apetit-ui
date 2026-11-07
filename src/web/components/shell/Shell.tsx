@@ -16,9 +16,9 @@ function NavItem({ page, active, variant }: { page: PageDef; active: boolean; va
   const Icon = page.icon;
   if (variant === "bottom")
     return (
-      <a href={`#${page.navPath}`} aria-current={active ? "page" : undefined} className={cn("flex min-w-16 flex-1 flex-col items-center gap-0.5 border-t-2 px-2 py-1.5 font-heading text-[11px] font-bold transition-colors duration-300", active ? "border-brand-vivid text-brand" : "border-transparent text-muted")}>
+      <a href={`#${page.navPath}`} aria-current={active ? "page" : undefined} className={cn("flex min-w-0 flex-1 basis-0 flex-col items-center gap-0.5 border-t-2 px-0.5 py-1.5 font-heading text-[10.5px] font-bold transition-colors duration-300", active ? "border-brand-vivid text-brand" : "border-transparent text-muted")}>
         <Icon className="size-5" aria-hidden />
-        {page.navLabel}
+        <span className="max-w-full truncate">{page.navLabel}</span>
       </a>
     );
   return (
@@ -100,7 +100,7 @@ export function Shell({ page, children }: { page: PageDef | null; children: Reac
         <footer className="px-4 pb-24 text-center text-[11px] text-muted md:hidden">All data is synthetic (Apetit × Since AI 2026 package)</footer>
       </div>
 
-      <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-30 flex overflow-x-auto border-t border-border bg-surface pb-[env(safe-area-inset-bottom)] md:hidden">
+      <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-30 flex border-t border-border bg-surface pb-[env(safe-area-inset-bottom)] md:hidden">
         {NAV_PAGES.map((p) => (
           <NavItem key={p.id} page={p} active={p.id === activeId} variant="bottom" />
         ))}

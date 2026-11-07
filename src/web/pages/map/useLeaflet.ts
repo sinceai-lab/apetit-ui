@@ -67,4 +67,10 @@ export function boundsOf(points: [number, number][], pad = 0.1): L.LatLngBounds 
   return L.latLngBounds(points.map(([lon, lat]) => [lat, lon] as [number, number])).pad(pad);
 }
 
+/** Leaflet canvas can't read CSS vars, so these mirror the styles.css tokens (light, dark). */
+export const mapInk = (dark: boolean) =>
+  dark
+    ? { grid: "#50555a", cell: "#a4a9ad", empty: "#232523", other: "#a4a9ad", surface: "#1b1c1b", brand: "#7cc443" }
+    : { grid: "#adb5bd", cell: "#5c636a", empty: "#f8f9fa", other: "#5c636a", surface: "#ffffff", brand: "#467b1e" };
+
 export { L };

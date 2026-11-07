@@ -5,7 +5,7 @@ import type { PageProps } from "./types";
 import { useServices } from "../lib/appData";
 import { fmtAgo, fmtTime } from "../lib/format";
 import { href } from "../lib/router";
-import { Async, Button, Card, PageHeader, Segmented, StatusDot, UpstreamBanner } from "../components/ui";
+import { Async, Badge, Button, Card, PageHeader, Segmented, StatusDot, UpstreamBanner } from "../components/ui";
 import { ServiceCard } from "./services/ServiceCard";
 import { EmbedView, EMBEDS, type EmbedId } from "./services/EmbedView";
 
@@ -60,7 +60,7 @@ export function ServicesPage({ params }: PageProps) {
                   if (!list.length) return null;
                   return (
                     <section key={g.id} aria-labelledby={`grp-${g.id}`}>
-                      <h2 id={`grp-${g.id}`} className="font-display text-lg font-bold text-ink">{g.title}</h2>
+                      <h2 id={`grp-${g.id}`} className="font-display text-lg font-bold text-heading">{g.title}</h2>
                       <p className="mb-3 text-[13px] text-muted">{g.blurb}</p>
                       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                         {list.map((s) => (
@@ -90,7 +90,7 @@ function Summary({ services, checkedAt }: { services: ServiceStatus[]; checkedAt
   return (
     <Card className="mb-6 grid gap-4 p-4 sm:grid-cols-[auto_1fr_auto] sm:items-center">
       <div className="flex items-baseline gap-2">
-        <span className="tnum text-[32px] font-semibold leading-none text-ink">{up}</span>
+        <span className="tnum text-[32px] font-semibold leading-none text-heading">{up}</span>
         <span className="text-sm text-muted">of {services.length} services up</span>
       </div>
       <div className="text-sm">
@@ -127,12 +127,12 @@ function StorageCard() {
       <div className="flex items-center gap-2">
         <HardDrive className="size-4 text-muted" aria-hidden />
         <span className="font-medium text-ink">Broker storage</span>
-        <span className="ml-auto rounded-full bg-surface-2 px-2 py-0.5 text-xs text-muted">not polled</span>
+        <Badge tone="neutral" className="ml-auto">not polled</Badge>
       </div>
       <p className="text-[13px] text-muted">
         MongoDB (:27017) holds the current entities and TimescaleDB (:5432) holds their history. They have no web page; if the broker is up, they are too.
       </p>
-      <a className="mt-auto inline-flex items-center gap-1 text-xs font-medium text-brand underline" href="#/data">
+      <a className="link mt-auto inline-flex items-center gap-1 text-xs" href="#/data">
         See what is stored <ExternalLink className="size-3" aria-hidden />
       </a>
     </Card>

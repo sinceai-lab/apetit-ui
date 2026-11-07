@@ -98,13 +98,13 @@ export function PipelineStrip({ stages }: { stages: Stage[] }) {
               href={s.href}
               title={s.title}
               className={cn(
-                "group flex min-w-0 flex-1 flex-col gap-1 rounded-card border bg-surface px-3 py-2.5 transition-colors hover:border-brand",
+                "group flex min-w-0 flex-1 flex-col gap-1 rounded-card border bg-surface px-3 py-2.5 transition-colors hover:border-brand-vivid",
                 s.status === "down" ? "border-down/60" : s.status === "degraded" ? "border-degraded/60" : "border-border",
               )}
             >
               <div className="flex items-center justify-between gap-1">
                 <span className="inline-flex min-w-0 items-center gap-1.5 text-[13px] font-medium text-ink">
-                  <Icon className="size-4 shrink-0 text-brand" aria-hidden />
+                  <Icon className="size-4 shrink-0 text-brand-vivid" aria-hidden />
                   <span className="truncate">{s.label}</span>
                 </span>
               </div>

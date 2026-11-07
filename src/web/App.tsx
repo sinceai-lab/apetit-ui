@@ -18,7 +18,7 @@ function Routes() {
   const loc = useLocation();
   const hit = resolve(loc.path);
   useEffect(() => {
-    document.title = hit ? `${hit.page.title} · Apetit Field Navigator` : "Apetit Field Navigator";
+    document.title = hit ? `${hit.page.title} · Apetit Farm insights` : "Apetit Farm insights";
     window.scrollTo(0, 0);
   }, [hit?.page.id, loc.path]);
   const Page = hit?.page.component;

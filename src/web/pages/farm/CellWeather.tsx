@@ -90,7 +90,7 @@ export function CellWeather({ cellId }: { cellId: string }) {
           series={[{ id: "rain", label: "Rain mm", color: VIZ.precip, kind: "bars", points: days.map((d, i) => ({ x: xs[i]!, y: d.precip })) }]}
         />
       </TableToggle>
-      <a href={href(`/weather/${cellId}`)} className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-brand hover:underline">
+      <a href={href(`/weather/${cellId}`)} className="link mt-2 inline-flex items-center gap-1 text-sm">
         Full weather and climate for {cellId} <ArrowRight className="size-3.5" aria-hidden />
       </a>
     </div>

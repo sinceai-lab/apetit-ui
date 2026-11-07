@@ -44,7 +44,7 @@ export function ServiceCard({ service: s }: { service: ServiceStatus }) {
     <Card className={cn("flex flex-col gap-3 p-4", s.status === "down" && "border-berry/50", s.status === "degraded" && "border-rapeseed")}>
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
-          <h3 className="font-medium leading-tight text-ink">{s.name}</h3>
+          <h3 className="font-heading font-bold leading-tight text-heading">{s.name}</h3>
           <div className="mt-0.5 font-mono text-[11px] text-muted">{hostPort(s.healthUrl)}</div>
         </div>
         <StatusBadge status={s.status} />
@@ -65,7 +65,7 @@ export function ServiceCard({ service: s }: { service: ServiceStatus }) {
         </div>
       </dl>
       {s.detail && (
-        <div className={cn("rounded-md px-2 py-1 text-xs", s.status === "up" ? "bg-surface-2 text-muted" : "bg-berry-soft text-ink")} title={`Health check: ${s.healthUrl}`}>
+        <div className={cn("rounded-card px-2 py-1 text-xs", s.status === "up" ? "bg-surface-2 text-muted" : "bg-berry-soft text-ink")} title={`Health check: ${s.healthUrl}`}>
           {s.status === "down" ? `Not answering: ${s.detail}` : s.detail}
         </div>
       )}

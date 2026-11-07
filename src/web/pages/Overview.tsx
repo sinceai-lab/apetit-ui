@@ -30,7 +30,7 @@ export function OverviewPage(_: PageProps) {
       {o && <UpstreamBanner errors={o.errors} stale={o.stale} />}
 
       <section aria-labelledby="pipe-h">
-        <h2 id="pipe-h" className="mb-2 text-sm font-semibold text-muted">
+        <h2 id="pipe-h" className="eyebrow mb-2">
           Where the numbers come from
         </h2>
         {o ? (
@@ -59,7 +59,7 @@ export function OverviewPage(_: PageProps) {
       </div>
 
       <section aria-labelledby="movers-h">
-        <h2 id="movers-h" className="font-display mb-1 text-xl font-bold text-ink">
+        <h2 id="movers-h" className="mb-1 text-xl font-bold text-heading">
           Farms that stand out
         </h2>
         <p className="mb-3 text-[13px] text-muted">Area-weighted estimate vs each farm's usual yield, over its contract parcels.</p>
@@ -101,7 +101,7 @@ function RegionCard({ region, kpis }: { region: Region; kpis: CropSummary[] }) {
       title={regionFlag(region)}
       subtitle={<LiveNote asOfDate={asOf} />}
       actions={
-        <a href={href("/season")} className="inline-flex items-center gap-1 text-sm font-medium text-brand hover:underline">
+        <a href={href("/season")} className="link inline-flex items-center gap-1 text-sm">
           Crops <ArrowRight className="size-3.5" aria-hidden />
         </a>
       }
@@ -152,7 +152,7 @@ function RegionCard({ region, kpis }: { region: Region; kpis: CropSummary[] }) {
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-xs text-muted">Bar = estimate (colour shows above or below usual), black tick = usual yield.</p>
+          <p className="mt-2 text-xs text-muted">Bar = estimate (colour shows above or below usual), tick = usual yield.</p>
         </TableToggle>
       </div>
     </Panel>
@@ -165,7 +165,7 @@ function Movers({ region, rows }: { region: Region; rows: Prediction[] }) {
   const above = [...farms].sort((a, b) => b.deltaPct! - a.deltaPct!).filter((f) => f.deltaPct! > 0).slice(0, 5);
   return (
     <Card className="p-4">
-      <h3 className="font-display text-lg font-bold text-ink">{regionFlag(region)}</h3>
+      <h3 className="text-lg font-bold text-heading">{regionFlag(region)}</h3>
       {!farms.length ? (
         <EmptyState className="mt-3" title="No farm estimates yet" />
       ) : (
@@ -183,7 +183,7 @@ function MoverList({ title, hint, farms }: { title: string; hint: string; farms:
   return (
     <div>
       <div className="mb-1.5 flex items-baseline justify-between">
-        <h4 className="text-sm font-semibold text-ink">{title}</h4>
+        <h4 className="text-sm font-semibold text-heading">{title}</h4>
         <span className="text-xs text-muted">{hint}</span>
       </div>
       {!farms.length ? (

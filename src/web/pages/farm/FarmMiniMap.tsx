@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import type { Cell, Farm, Parcel, Prediction } from "@/shared/types";
 import { deltaColor } from "../../charts";
-import { boundsOf, L, useLeaflet } from "../map/useLeaflet";
+import { boundsOf, L, mapInk, useLeaflet } from "../map/useLeaflet";
 
 export function FarmMiniMap({ farm, parcels, preds, cell }: { farm: Farm; parcels: Parcel[]; preds: Prediction[]; cell: Cell | null }) {
   const { ref, map, renderer, dark, tilesFailed } = useLeaflet();
@@ -18,19 +18,19 @@ export function FarmMiniMap({ farm, parcels, preds, cell }: { farm: Farm; parcel
           [lat - 0.125, lon - 0.125],
           [lat + 0.125, lon + 0.125],
         ],
-        { renderer, weight: 1, dashArray: "4 3", color: dark ? "#8C8678" : "#8C8678", fillOpacity: 0.04, interactive: false },
+        { renderer, weight: 1, dashArray: "4 3", color: mapInk(dark).cell, fillOpacity: 0.04, interactive: false },
       ).addTo(g);
     }
     for (const p of parcels) {
       const pr = byParcel.get(p.parcelId);
       const [lon, lat] = p.location;
       const m = pr
-        ? L.circleMarker([lat, lon], { renderer, radius: 6, weight: 1.5, color: dark ? "#121510" : "#FFFFFF", fillOpacity: 0.95, fillColor: deltaColor(pr.deltaPct, dark) })
-        : L.circleMarker([lat, lon], { renderer, radius: 3.5, weight: 0, fillOpacity: 0.7, fillColor: dark ? "#8A8678" : "#9C9684" });
+        ? L.circleMarker([lat, lon], { renderer, radius: 6, weight: 1.5, color: mapInk(dark).surface, fillOpacity: 0.95, fillColor: deltaColor(pr.deltaPct, dark) })
+        : L.circleMarker([lat, lon], { renderer, radius: 3.5, weight: 0, fillOpacity: 0.7, fillColor: mapInk(dark).other });
       m.bindTooltip(`${p.parcelId}${pr ? ` · ${pr.crop}` : ` · ${p.crop} (no contract)`}`).addTo(g);
     }
     const [flon, flat] = farm.location;
-    L.circleMarker([flat, flon], { renderer, radius: 7, weight: 3, color: dark ? "#8CC08A" : "#2F5D31", fillColor: dark ? "#1A1F17" : "#FFFFFF", fillOpacity: 1 })
+    L.circleMarker([flat, flon], { renderer, radius: 7, weight: 3, color: mapInk(dark).brand, fillColor: mapInk(dark).surface, fillOpacity: 1 })
       .bindTooltip(`Farm ${farm.farmId}`)
       .addTo(g);
     g.addTo(map);
@@ -44,7 +44,7 @@ export function FarmMiniMap({ farm, parcels, preds, cell }: { farm: Farm; parcel
   return (
     <div className="relative isolate overflow-hidden rounded-lg border border-border">
       <div ref={ref} className="h-64 w-full" role="region" aria-label={`Map of farm ${farm.farmId} and its parcels`} />
-      {tilesFailed && <span className="absolute right-2 top-2 z-[500] rounded-full bg-rapeseed-soft px-2.5 py-0.5 text-xs">Basemap unavailable</span>}
+      {tilesFailed && <span className="absolute right-2 top-2 z-[500] rounded-card bg-rapeseed-soft px-2.5 py-0.5 text-xs text-ink">Basemap unavailable</span>}
     </div>
   );
 }

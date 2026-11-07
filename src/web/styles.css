@@ -278,6 +278,6 @@
   color: var(--text);
   border-color: var(--border);
 }
-.dark .leaflet-control-attribution a {
+.leaflet-control-attribution a {
   color: var(--brand);
 }

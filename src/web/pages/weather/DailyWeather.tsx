@@ -48,7 +48,7 @@ export function DailyWeather({ cellId, scenario, days }: { cellId: string; scena
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4 rounded-card border border-border bg-surface p-4 shadow-card lg:grid-cols-5" title={src}>
+      <div className="grid grid-cols-2 gap-4 rounded-card border border-border bg-surface p-4 lg:grid-cols-5" title={src}>
         <Stat label="Mean temperature" value={fmtFixed(s.tMean)} unit="°C" foot={`${fmtNum(s.frostDays)} frost nights`} source={src} />
         <Stat label="Rain this season" value={fmtNum(s.rain)} unit="mm" foot={`${fmtNum(s.rainDays)} days with ≥ 1 mm`} source={src} />
         <Stat label="Evaporation demand" value={fmtNum(s.et0)} unit="mm" foot="reference ET0" source={src} />

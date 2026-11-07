@@ -1,4 +1,4 @@
-# Apetit Field Navigator (apetit-ui)
+# Apetit Farm insights (apetit-ui)
 
 One Apetit-themed UI over every service in the sinceai stack: the Coraine broker, live yield inference (through the backend), weather, provenance, a native chat over the FIWARE chat-bot, and C3 and Streamlit embeds.
 

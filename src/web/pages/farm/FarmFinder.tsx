@@ -39,7 +39,7 @@ export function FarmFinder() {
           />
         }
       >
-        <label className="mb-3 flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 focus-within:border-brand">
+        <label className="field mb-3 flex items-center gap-2 px-3 py-2 focus-within:border-focus focus-within:shadow-[0_0_0_0.2rem_var(--focus-ring)]">
           <Search className="size-4 text-muted" aria-hidden />
           <span className="sr-only">Search farms</span>
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Farm id (F0001, S0381) or crop (pea, carrot)…" className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted" autoFocus />
