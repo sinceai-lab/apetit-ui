@@ -1,4 +1,4 @@
-// Leaflet map bound to a div: canvas renderer, Esri grey light/dark basemap that follows the theme.
+// Leaflet map bound to a div: canvas renderer, Esri grey light/dark basemap that follows the theme, or Esri satellite imagery.
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import { useIsDark } from "../../lib/prefs";
@@ -6,9 +6,14 @@ import { useIsDark } from "../../lib/prefs";
 // Esri grey canvas: keyless (CARTO tiles now render an "API key required" watermark).
 const TILE = (dark: boolean) => `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${dark ? "Dark" : "Light"}_Gray_Base/MapServer/tile/{z}/{y}/{x}`;
 const ATTR = 'Tiles &copy; <a href="https://www.esri.com">Esri</a> &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors';
+// Esri World Imagery: keyless satellite/aerial photos.
+const SAT_TILE = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+const SAT_ATTR = 'Imagery &copy; <a href="https://www.esri.com">Esri</a> &mdash; Esri, Maxar, Earthstar Geographics, and the GIS User Community';
 
-export function useLeaflet(opts: { basemap?: boolean; interactive?: boolean } = {}) {
-  const { basemap = true, interactive = true } = opts;
+export type BasemapStyle = "map" | "satellite";
+
+export function useLeaflet(opts: { basemap?: boolean; interactive?: boolean; style?: BasemapStyle } = {}) {
+  const { basemap = true, interactive = true, style = "map" } = opts;
   const ref = useRef<HTMLDivElement | null>(null);
   const [inst, setInst] = useState<{ map: L.Map; renderer: L.Canvas } | null>(null);
   const [tilesFailed, setTilesFailed] = useState(false);
@@ -46,7 +51,8 @@ export function useLeaflet(opts: { basemap?: boolean; interactive?: boolean } = 
   useEffect(() => {
     if (!map || !basemap) return;
     let errors = 0;
-    const layer = L.tileLayer(TILE(dark), { attribution: ATTR, maxNativeZoom: 16, maxZoom: 18, crossOrigin: true });
+    const sat = style === "satellite";
+    const layer = L.tileLayer(sat ? SAT_TILE : TILE(dark), { attribution: sat ? SAT_ATTR : ATTR, maxNativeZoom: sat ? 18 : 16, maxZoom: 18, crossOrigin: true });
     layer.on("tileerror", () => {
       if (++errors >= 4) setTilesFailed(true);
     });
@@ -56,7 +62,7 @@ export function useLeaflet(opts: { basemap?: boolean; interactive?: boolean } = 
     return () => {
       layer.remove();
     };
-  }, [map, dark, basemap]);
+  }, [map, dark, basemap, style]);
 
   return { ref, map, renderer: renderer!, dark, tilesFailed };
 }
@@ -70,7 +76,7 @@ export function boundsOf(points: [number, number][], pad = 0.1): L.LatLngBounds 
 /** Leaflet canvas can't read CSS vars, so these mirror the styles.css tokens (light, dark). */
 export const mapInk = (dark: boolean) =>
   dark
-    ? { grid: "#50555a", cell: "#a4a9ad", empty: "#232523", other: "#a4a9ad", surface: "#1b1c1b", brand: "#7cc443" }
-    : { grid: "#adb5bd", cell: "#5c636a", empty: "#f8f9fa", other: "#5c636a", surface: "#ffffff", brand: "#467b1e" };
+    ? { grid: "#4d584b", cell: "#9daa9b", empty: "#212821", other: "#9daa9b", surface: "#1a201a", brand: "#7fbf7f" }
+    : { grid: "#a9b5a5", cell: "#6b7a6b", empty: "#f4f6f2", other: "#6b7a6b", surface: "#ffffff", brand: "#3f7d3f" };
 
 export { L };

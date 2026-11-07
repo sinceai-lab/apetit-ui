@@ -491,3 +491,130 @@ Scale: 12, 13 (meta), 14 (body, dense tables), 16 (body), 20, 24 and 32 (KPI num
 ## 9. Samples index (`docs/samples/`)
 
 `broker-types.json`; `broker-{Farm,Parcel,ClimateGridCell,WeatherObserved,YieldPrediction,LoadLog}-{keyValues,normalized}.json` (2 entities each); `broker-Farm-SE-keyValues.json` (Swedish raw values); `broker-temporal-ClimateGridCell-normalized.json` (4 months around the historical→SSP switch); `broker-temporal-ClimateGridCell-temporalValues.json` (2026-01..2027-06, 3 attrs); `broker-subscriptions.json`; `inference-health.json`; `inference-predictions-latest.json` (3 of 2,465); `inference-observations-status.json` (2 of 84 seasons); `backend-live-health.json`; `chatbot-me.json`; `chatbot-providers.json`; `chatbot-chat-events.json` (one real run, tool output trimmed); `chatbot-chat-raw.sse` (the same run as wire format).
+
+---
+
+## 10. Insights: climate risk, advice, outlook, what-if and model trust
+
+This adds what the Streamlit viewer shows and this app lacked: **Risk and advice**, **All crops**, **Try the model** and **Can we trust this?**, plus the climate story on Map and Farm. The upstream is the inference service (`INFERENCE_URL`, 127.0.0.1:8600), whose `/insights/*` endpoints are specified in `model-inference/docs/INSIGHTS_API.md`. That file is the source of truth for the upstream shapes. This section covers this app's routes and pages.
+
+It changes one rule from the top of this file: besides the chat pass-through there is now a second POST, `/api/insights/what-if`. It computes a prediction and writes nothing.
+
+### 10.1 Rules
+
+- **Show what the model returns.** No yield, change, error or € figure is computed in TypeScript, not even a sum or a mean. If a page needs a number the upstream doesn't send, add it to `INSIGHTS_API.md` first. Formatting (`fmtShare`, `fmtDelta`, `fmtTHa`, €) and sorting are fine.
+- **Label the kind of number.** Every insight response carries `basis {kind, label, model_version, sources[{file, generated_at}], stale_vs_model}`.
+  - `kind: "batch"` (files in `outputs/`) and `kind: "model"` (computed from the trained model for a scenario) are **scenario results**. Show a chip such as "Scenario result · model 5cf88f33 · file 7 Nov 2026" next to the panel title, and put `basis.label` in the subtitle. The file date is wall-clock time; label it as the date the results were made, not as data.
+  - Live in-season estimates (`/api/live/*`) keep their own "Live estimate · as of 27 Oct 2027" label. Never put a live estimate and a scenario result in one chart or one KPI.
+  - With `stale_vs_model: true`, show a calm notice: "These results were made with an older model. Rerun the pipeline before relying on them."
+- **Finland and Sweden stay separate.** Every insight endpoint is per region. With the region switch on "Both", show the two regions side by side; never add them up (the € totals included).
+- **Plain language.** Use the upstream's `text` for sentences, and keep its draft and evidence labels ("Draft rule for advisors to review", "Evidence: Model estimate"). Lead with a chart, then the sentence, then the table behind it (`TableToggle`).
+- **Colours.** Yield change uses the brown→teal diverging scale (`--viz-below-*` … `--viz-above-*`), with `deltaColor` given the change as a percentage and clamped at ±25. For climate stories, ±6 % covers every value, so pass a page-local domain of ±6 (the same breaks as `bands.edges` from `/insights/farms`) rather than recolouring. Crops use `cropColor`. Climate stories use `--viz-ssp126` (Below 2 °C) and `--viz-ssp585` (Hothouse). Baseline lines are dashed `--muted`, model lines `--brand`.
+- **Theme.** apetit.com look as in `styles.css` and `BUILDING.md`: Heebo for body text, Lexend for headings, Roboto for numbers, `--brand` greens, 5 px radii, flat cards, `.btn-primary` / `.btn-outline` / `.field` / `.link` / `.eyebrow`.
+
+### 10.2 Server routes (`src/server/insights.ts`, registered in `routes.ts`)
+
+All are GET pass-throughs to `${INFERENCE_URL}/insights/...` with **whitelisted parameters**. A parameter that isn't listed, or doesn't match, gives 400 before any upstream call. Responses are camelCased like the rest of the API and get the usual envelope (`fetchedAt`, `cached`, `stale`). `basis` is passed through (camelCased). Upstream 404 and 422 are returned as 404 and 400 with the upstream's `detail` as `error`. Unreachable gives 503 `{error, upstream:"inference"}`.
+
+| Route | Upstream | Params (all validated) | Cache TTL |
+|---|---|---|---|
+| `GET /api/insights/meta` | `/insights/meta` | none | 60 s |
+| `GET /api/insights/options` | `/insights/options` | `region` (FI_SW, SE_SKANE), `crop` (RX.crop, needs region), `farm` (RX.farmId → `farm_id`) | 10 min |
+| `GET /api/insights/advice` | `/insights/advice` | `region`, `crop`, `story` (below_2c, current_policies), all required | 5 min |
+| `GET /api/insights/policy` | `/insights/policy` | none | 10 min |
+| `GET /api/insights/outlook` | `/insights/outlook` | `region`, `crop`, required | 10 min |
+| `GET /api/insights/climate-risk` | `/insights/climate-risk` | `scenario` (ssp126, ssp585), required | 10 min |
+| `GET /api/insights/euro-risk` | `/insights/euro-risk` | none | 10 min |
+| `GET /api/insights/farms` | `/insights/farms` | `region`, `crop`, required | 5 min |
+| `GET /api/insights/soil-effects` | `/insights/soil-effects` | `region`, `crop`, required | 10 min |
+| `GET /api/insights/farms/:farmId` | `/insights/farms/{farm_id}` | path RX.farmId; `crop`, `story` required | 5 min |
+| `GET /api/insights/fields/:parcelId` | `/insights/fields/{parcel_id}` | path RX.parcelId; `crop`, `story` required | 5 min |
+| `GET /api/insights/trust` | `/insights/trust` | `test` (loyo, forward), required | 10 min |
+| `GET /api/insights/trust/seasons` | `/insights/trust/seasons` | `region`, `crop`, `test` required; `farm` optional (→ `farm_id`) | 10 min |
+| `GET /api/insights/trust/live-replay` | `/insights/trust/live-replay` | `test` required; `scope` (`all` or `^(FI_SW\|SE_SKANE)/[a-z_]{2,32}$`) | 10 min |
+| `GET /api/insights/trust/corrections` | `/insights/trust/corrections` | none | 10 min |
+| `POST /api/insights/what-if` | `POST /insights/what-if` | body, below | 10 min per identical body |
+
+The cache key is the path plus the sorted, validated parameters. Stale-while-error applies, as in §5.1. The TTLs are short only so that a pipeline rerun shows up; the upstream reloads files itself.
+
+**`POST /api/insights/what-if`**
+
+- Body ≤ 2 KB, `content-type: application/json`, else 413 or 415.
+- Exactly these keys, nothing else (400 names the first problem):
+  - `parcelId` matching RX.parcelId
+  - `crop`, one of the five crops
+  - `weather`, one of `history`, `c1`, `low`, `middle`, `high`
+  - `year`, an integer inside that weather set's range (1991–2026, 2027–2031, or 2041–2060)
+  - `irrigation`, one of `usual`, `irrigated`, `rainfed`. Anything but `usual` is only allowed for a Swedish parcel (`S…`), because no Finnish farm switches practice.
+- The server maps the body to the upstream one, so the browser never sends model codes. `weather` maps to `scenario` (history → historical, c1 → ssp245, low → ssp126, middle → ssp245, high → ssp585). `irrigation` maps to null, 1 or 0. `parcelId` becomes `parcel_id`.
+- **Guard:** at most 20 requests a minute per client address (a token bucket in memory, keyed by `server.requestIP(req)`), and at most 2 upstream calls at once across the app. Over either limit, answer 429 `{error:"Too many what-if runs. Wait a moment and try again."}` with `retry-after`. The upstream timeout is 15 s.
+- Identical bodies are served from the cache, since the result is deterministic for a model version. The cache key includes `basis.modelVersion` from the last `/api/insights/meta`.
+- If the upstream is older and `/insights/what-if` gives 404, the route falls back to `POST /predict/field`. It returns `{prediction}` alone with `degraded: "drivers unavailable"`, and the page hides the "Why this number" chart instead of computing it.
+- The response is the upstream's, camelCased: `{prediction, baseTHa, vsBaseline, drivers[], parcel, weatherTable[], notes[], fairCheck, actualNote, basis}`.
+
+`/api/services` needs no change: `/insights/*` is part of the inference service, and its health is already polled.
+
+### 10.3 Page plan
+
+New entries in `pages/registry.tsx`, in their own sidebar group, *Climate & planning*, between *This season* and *Tools*, so live and scenario pages stay apart. On phones, Advice is a bottom tab and the rest sit under **More** (see `BUILDING.md`, Routing). Icons are from `lucide-react`.
+
+| Page | Pattern | Nav label | Icon | Region switch |
+|---|---|---|---|---|
+| Risk & advice | `#/advice?crop=&story=` | Advice | `ShieldAlert` | yes |
+| Outlook | `#/outlook?crop=&scenario=` | Outlook | `TrendingUp` | yes |
+| Try the model | `#/try?parcel=&crop=&weather=&year=&irrigation=` | Try it | `FlaskConical` | yes |
+| Model trust | `#/trust?test=&crop=` | Trust | `BadgeCheck` | no (shows both regions in separate rows) |
+
+Every selection lives in the query, so a link to a page opens it with the same choices. Every panel has loading, empty and error states, and every chart has a "Show as table" toggle.
+
+**Risk & advice** (`/api/insights/advice`, `/api/insights/policy`, `/api/insights/euro-risk`). For the farming team and advisors before the pre-season meetings.
+- Header: "What does climate change mean for this crop?" Below it, a crop picker limited to the region's `advicePairs` (from `/api/insights/options`) and a story toggle, "Below 2 °C" or "Hothouse", with the one-line `blurb` for each. A confidence badge shows `confidence`: `up` for Medium, `degraded` for anything starting with Low.
+- Two story cards side by side. Each has Yield change (with "If one season is dropped: low to high"), Bad-year chance (with "Yield under 80 % of normal. Today: x. Seen so far: n of N seasons"), and Added import cost a year.
+- **What to do (draft):** `actions` as cards. Each card has the `decision` as its eyebrow, then the `text`, then "Evidence: …". It always carries the "Draft rules for advisors to review" note. These cards are the page's main content, because farmers' stated gap is knowing what to do.
+- **What's behind the yield change:** a paired bar chart of `themes` (two bars per theme, one per story) with `themesNote`.
+- **How the season changes:** a bar chart of `seasonShift` (days earlier), the `seasonTable`, and `seasonNote`.
+- **Policy costs:** three small line charts (fertiliser, diesel and carbon against 2025), one line per story, and the farm's input use from `inputs`.
+- **Cost of replacing shortfalls:** the region's € row from `euroRisk.totals` and this crop's rows from `byCrop`.
+
+**Outlook** (`/api/insights/outlook`, `/api/insights/climate-risk`, `/api/insights/euro-risk`). Covers the "All crops" tab.
+- A top warning: "No answers are public for these years, so these are the model's estimates, not measured accuracy. See Model trust for how it did on past seasons."
+- **Next five seasons (2027–2031):** a line chart of past actual yield (solid `--muted`), the model forecast (`--brand`) and the package baseline (dashed), for the chosen crop.
+- **Yield change by 2041–2060:** a scenario toggle (Below 2 °C or Hothouse), then a dot-and-range chart with one row per crop in the region, sorted as returned. The dot is coloured on the brown→teal scale, the range is the "one season left out" span, and a zero line marks the no-change baseline. Low-confidence rows get a "Low confidence" badge. The table adds the bad-year chance.
+- **€ at stake:** per-region totals for Today's climate, Below 2 °C and Hothouse, then a by-crop table. Shows `note`, which says what the cost leaves out.
+
+**Try the model** (`POST /api/insights/what-if`, `/api/insights/options`).
+- Pickers: crop (by region) → farm (`options.farms`) → field (`options.parcels`, labelled "P07 · clay · 3.2 ha") → weather (`weatherSets` labels) → season (within the set's years) → irrigation (Sweden only; otherwise disabled, with `irrigationNote` as help text). A "Run" button (`.btn-primary`) sends the request; changing a picker doesn't send it on its own, which keeps load low.
+- Result: three stats, "Our model" t/ha (with `vsBaseline` as a delta), "Baseline: farm average" ("The same for any weather"), and "Actual for this farm" (from `fairCheck`, or "Not available"). `fairCheck.text` sits in an info callout.
+- **Why this number:** horizontal bars of `drivers`, teal for up and brown for down, starting from `baseTHa`, with the overlap caveat.
+- `notes` as a bullet list. A collapsed "Weather values used" table shows `weatherTable`. An out-of-range warning appears when `prediction.outOfTrainingRange` is non-empty ("Some of this season's weather is outside what the model saw in training").
+- Label: "What-if with the trained model · model 5cf88f33". Never "forecast" or "live".
+
+**Model trust** (`/api/insights/trust`, `/trust/seasons`, `/trust/live-replay`, `/trust/corrections`). For advisors and management deciding how much weight to give the numbers.
+- Header: "Can we trust this?" Then the two method cards (`methods`) and a test toggle.
+- Two stats: "Regional production error" and "Farm-level yield error", model against baseline (lower is better). `headlineNote` and `caveat` are always visible, not hidden in a tooltip.
+- **By crop:** paired bars (baseline and our model) per region and crop, as returned, and the table with "Improvement".
+- **Season by season:** a line chart (actual, baseline, our model) for a chosen crop in each region, then "Check a single farm" with a farm picker.
+- **When does the live estimate help?** A line of `estimateProductionError` against `knownUntil`, with the flat baseline and a marker at `firstBetter`: "Before mid-June the live estimate is no better than the farm average." The Live season page links here from its early-season note.
+- Collapsed sections: Pea model used for long-range results (`peaModels`), Hackathon auto-scorer (`scorer`, with its "not used by Apetit" note), How the yield data was cleaned (`corrections`), and the C1 self-check.
+
+**Map: additions** (`/api/insights/farms`, `/api/insights/advice`, `/api/insights/fields/:id`, `/api/insights/soil-effects`).
+- A layer switch: "This season (live)", the current Δ vs usual, or "Climate outlook 2041–2060". The second has a story toggle (Below 2 °C or Hothouse) and a crop picker.
+- With the climate layer, farm markers come from `/insights/farms`: positioned at `lat/lon`, sized by `areaHa`, and coloured by `change<Story>` on the brown→teal scale, using `bands.edges` for the legend ("Estimated yield change, 2041–2060 against 1991–2020"). The legend counts farms per band. The live parcel layer is hidden, so the two kinds of number never share a map.
+- The side panel follows the same path as Streamlit. With nothing selected it shows the region and crop summary: yield change, bad-year chance, confidence, the `why` lines and the top 2 draft actions, from `/insights/advice`. A selected farm shows the farm story (from `/insights/farms/:id`, below). A selected field shows `/insights/fields/:id`, including the `localNote` caveat.
+- Below the map: a **Farms to contact first** table in the returned order, with the columns Farm, Fields, Area, On sand or fine sand (ha), Share, Planned 2027–2028 on sand or fine sand (ha) and Yield change. A row click opens the farm.
+- `note` ("What the colour means / doesn't mean") sits under the map, plus the existing synthetic-positions warning.
+
+**Farm: additions** (`/api/insights/farms/:farmId`, `/api/insights/fields/:parcelId`).
+- A new **Climate outlook** section under the live estimate, with a crop picker (the farm's contract crops that the model covers) and a story toggle.
+- Headline stats: yield change for this farm, "On sand or fine sand" share, and "Usual irrigated share". `risk.text` is the lead sentence and `why` the bullets.
+- **Modelled yield by soil on this farm:** bars of `yieldBySoil`.
+- **Fields, highest modelled yield first:** a table of `fields` with yield today, change under each story (`soilChange*`, with the cell-level `change*` in the tooltip), drought stress, last grown and next planned. Droughty fields get a `rapeseed` badge "Holds least water". It shows `fieldsWarning` above it and `fieldsNote` below. A row click opens a `Drawer` with `/insights/fields/:id`.
+- **What to do (draft):** the top 2 `actions`, with "All draft actions (n)" opening the rest, and the same draft note as on Risk & advice.
+- **Try this field:** a link on each field row and in the drawer to `#/try?parcel=…&crop=…&weather=high&year=2050`.
+- The section's chip reads "Scenario result · model … · file …", kept apart from the live "This season's estimate" panel above it.
+
+### 10.4 Checks to add
+
+- `tests/insights.test.ts`: each route rejects unknown and badly formed params with 400 and makes no upstream call. `what-if` rejects extra keys, a wrong year for the weather set, Finnish non-usual irrigation and bodies over 2 KB, and the guard answers 429 on the 21st call in a minute.
+- A camelCase round trip on samples captured from the running service into `docs/samples/insights-*.json`.
+- No page component imports `shared/aggregate.ts` for insight data, and none uses arithmetic on insight figures beyond formatting.

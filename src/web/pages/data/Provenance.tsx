@@ -78,7 +78,7 @@ function Trace({ id, loadLogs }: { id: string; loadLogs: LoadLogRow[] }) {
           });
         const logs = [...new Set(refs.map((r) => r.logId).filter((x): x is string => !!x))];
         return (
-          <div className="space-y-4 text-sm">
+          <div className="space-y-6 text-sm">
             <div>
               <div className="text-xs text-muted">{String(e.type)}</div>
               <div className="break-all font-mono text-xs text-ink">{e.id}</div>
@@ -121,7 +121,7 @@ function Trace({ id, loadLogs }: { id: string; loadLogs: LoadLogRow[] }) {
                   </thead>
                   <tbody>
                     {refs.map((r) => (
-                      <tr key={r.attr} className="border-t border-border">
+                      <tr key={r.attr} className="border-t border-border even:bg-surface-2">
                         <td className="px-2 py-1 font-mono">{r.attr}</td>
                         <td className="max-w-[10rem] truncate px-2 py-1" title={r.value}>{r.value}</td>
                         <td className="px-2 py-1 text-muted">{r.logId ? byId.get(r.logId)?.file ?? shortHash(r.logId.split(":").pop()) : "–"}</td>

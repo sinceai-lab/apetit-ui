@@ -48,7 +48,7 @@ export function SourceDrawer({ open, onClose, entities }: { open: boolean; onClo
           const files = new Map<string, string[]>();
           for (const r of refs) files.set(r.loadLog, [...(files.get(r.loadLog) ?? []), r.attr]);
           return (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-5">
               {files.size > 0 ? (
                 <ul className="flex flex-col gap-2">
                   {[...files.entries()].map(([logId, attrs]) => {

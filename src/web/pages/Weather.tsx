@@ -45,8 +45,8 @@ export function WeatherPage({ params }: PageProps) {
         }
       />
 
-      <div className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="space-y-4">
+      <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
+        <aside className="space-y-6">
           <Card className="p-4">
             <Async state={cells} loading={<Skeleton className="h-48" />}>
               {() =>
@@ -61,7 +61,7 @@ export function WeatherPage({ params }: PageProps) {
           <Coverage season={season} loading={obs.loading && !obs.data} error={obs.error} cellId={cellId} />
         </aside>
 
-        <div className="min-w-0 space-y-4">
+        <div className="min-w-0 space-y-6">
           {cellId && cells.data && !cell && <ErrorState error={`There is no grid cell called ${cellId}. Pick one from the list.`} />}
           {cellId && (cell || !cells.data) ? <CellWeather cellId={cellId} /> : !cellId && cells.loading ? <Skeleton className="h-72" /> : null}
           {cellId && cell && <ClimatePanel cellId={cellId} />}

@@ -30,12 +30,7 @@ export function OverviewPage(_: PageProps) {
       {o && <UpstreamBanner errors={o.errors} stale={o.stale} />}
 
       <section aria-labelledby="pipe-h">
-        <h2 id="pipe-h" className="eyebrow mb-2">
-          Where the numbers come from
-        </h2>
-        {o ? (
-          <PipelineStrip stages={buildStages(o.pipeline, services.data?.services, o.source)} />
-        ) : overview.error ? (
+        {o ? (<></>) : overview.error ? (
           <ErrorState error={overview.error} onRetry={overview.refresh} />
         ) : (
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
@@ -48,7 +43,7 @@ export function OverviewPage(_: PageProps) {
 
       {o?.season.asOfDate && <EarlySeasonNote asOfDate={o.season.asOfDate} />}
 
-      <div className={regions.length > 1 ? "grid gap-4 lg:grid-cols-2" : "grid gap-4"}>
+      <div className={regions.length > 1 ? "grid gap-5 lg:grid-cols-2" : "grid gap-5"}>
         {regions.map((r) =>
           o ? (
             <RegionCard key={r} region={r} kpis={o.kpis.filter((k) => k.region === r)} />
@@ -64,7 +59,7 @@ export function OverviewPage(_: PageProps) {
         </h2>
         <p className="mb-3 text-[13px] text-muted">Area-weighted estimate vs each farm's usual yield, over its contract parcels.</p>
         {preds.data ? (
-          <div className={regions.length > 1 ? "grid gap-4 lg:grid-cols-2" : "grid gap-4"}>
+          <div className={regions.length > 1 ? "grid gap-5 lg:grid-cols-2" : "grid gap-5"}>
             {regions.map((r) => (
               <Movers key={r} region={r} rows={filterPredictions(preds.data!.predictions, { region: r })} />
             ))}
@@ -98,7 +93,7 @@ function RegionCard({ region, kpis }: { region: Region; kpis: CropSummary[] }) {
 
   return (
     <Panel
-      title={regionFlag(region)}
+      title={`Total Harvest Yield – ${regionFlag(region)}`}
       subtitle={<LiveNote asOfDate={asOf} />}
       actions={
         <a href={href("/season")} className="link inline-flex items-center gap-1 text-sm">
@@ -106,7 +101,7 @@ function RegionCard({ region, kpis }: { region: Region; kpis: CropSummary[] }) {
         </a>
       }
     >
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-5 sm:grid-cols-3">
         <Stat label="Contract area" value={fmtNum(area)} unit="ha" foot={`${fmtNum(kpis.reduce((s, k) => s + k.parcels, 0))} parcels · ${kpis.length} ${kpis.length === 1 ? "crop" : "crops"}`} source={source} />
         <Stat label="Estimated harvest" value={fmtNum(est)} unit="t" foot={<>usual {fmtTonnes(base)}</>} source={source} />
         <Stat label="vs usual yield" value={<Delta value={delta} size="xl" />} foot="estimate vs farm averages" source={source} className="col-span-2 sm:col-span-1" />
@@ -169,7 +164,7 @@ function Movers({ region, rows }: { region: Region; rows: Prediction[] }) {
       {!farms.length ? (
         <EmptyState className="mt-3" title="No farm estimates yet" />
       ) : (
-        <div className="mt-3 grid gap-4 sm:grid-cols-2">
+        <div className="mt-3 grid gap-5 sm:grid-cols-2">
           <MoverList title="Most below usual" hint="Worth a call" farms={below} />
           <MoverList title="Most above usual" hint="Going well" farms={above} />
         </div>

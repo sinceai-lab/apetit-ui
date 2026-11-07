@@ -35,6 +35,22 @@ const CROP_HEX: Record<string, [string, string]> = {
 };
 export const cropHex = (crop: string, dark = false) => CROP_HEX[crop]?.[dark ? 1 : 0] ?? "#8C8678";
 
+/** Rotation (non-contract) crops on land-use charts: context, not the point, so one warm-grey ramp instead of new hues.
+ *  Fixed per crop (never by rank), fallow the most recessive. Validated as an ordinal ramp: light vs #ffffff, dark vs #1a201a. */
+export const ROTATION_CROPS = ["barley", "wheat", "oats", "grass_ley", "fallow"] as const;
+const ROTATION_GREY: [string[], string[]] = [
+  ["#45423b", "#605c53", "#7c776c", "#999386", "#b8b2a4"],
+  ["#e0dbcf", "#bdb7aa", "#9b9588", "#7a7569", "#5b574e"],
+];
+/** Land-use colour: Apetit crops keep their hue, rotation crops get their grey step, anything else the "other" colour. */
+export const landUseColor = (crop: string, dark = false) => {
+  if (CROP_VARS.has(crop)) return cropColor(crop);
+  const i = (ROTATION_CROPS as readonly string[]).indexOf(crop);
+  return i >= 0 ? ROTATION_GREY[dark ? 1 : 0][i]! : "var(--viz-other)";
+};
+/** Fixed slice order for land use: contract crops first (the point), then the rotation crops, then the rest by name. */
+export const LAND_USE_ORDER = ["pea", "turnip_rape", "potato", "carrot", "spinach", ...ROTATION_CROPS];
+
 /** Δ% domain clamp for the diverging estimate-vs-baseline scale. */
 export const DELTA_CLAMP = 25;
 const DIV_LIGHT = ["#A6611A", "#DFC27D", "#EDE7D9", "#80CDC1", "#01665E"];

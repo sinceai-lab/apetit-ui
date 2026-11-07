@@ -10,21 +10,15 @@ import { getHistory, getLiveHealth, getObservations, getPredictions } from "./li
 import { getServices } from "./services";
 import { buildPipeline, countsFrom, seasonInfo, stripKeys } from "./shape";
 import { chatMeta, chatStream } from "./chat";
+import { RX } from "./rx";
+import { clearWhatIfCache, insightRoutes } from "./insights";
+import { getFieldTile } from "./geo";
 
-export const RX = {
-  farmId: /^[FS]\d{4}$/,
-  cellId: /^[A-Z]{2}\d{4}$/,
-  parcelId: /^[FS]\d{4}-P\d{1,4}$/,
-  entityId: /^urn:ngsi-ld:(Farm|Parcel|ClimateGridCell|WeatherObserved|YieldPrediction|LoadLog|Catchment):[A-Za-z0-9_.:-]{1,128}$/,
-  date: /^\d{4}-\d{2}-\d{2}$/,
-  month: /^\d{4}-(0[1-9]|1[0-2])$/,
-  crop: /^[a-z_]{2,32}$/,
-  year: /^\d{4}$/,
-};
+export { RX };
 
-type Ctx = { req: Request; url: URL; params: Record<string, string>; server?: Server<unknown> };
-type Handler = (c: Ctx) => Promise<Response> | Response;
-interface Route {
+export type Ctx = { req: Request; url: URL; params: Record<string, string>; server?: Server<unknown> };
+export type Handler = (c: Ctx) => Promise<Response> | Response;
+export interface Route {
   method: "GET" | "POST";
   pattern: string;
   handler: Handler;
@@ -274,12 +268,17 @@ export const routes: Route[] = [
     },
   },
 
+  // Real field-parcel shapes (Finland only) from the Finnish Food Authority open WFS.
+  { method: "GET", pattern: "/api/geo/fields", handler: ({ url }) => getFieldTile(url) },
+
   { method: "GET", pattern: "/api/chat/:name", handler: ({ req, params }) => chatMeta(req, params.name ?? "") },
   { method: "POST", pattern: "/api/chat", handler: ({ req, server }) => chatStream(req, server) },
+
+  ...insightRoutes,
 ];
 
 if (process.env.NODE_ENV !== "production") {
-  routes.push({ method: "POST", pattern: "/api/cache/clear", handler: () => (cache.clear(), json({ ok: true })) });
+  routes.push({ method: "POST", pattern: "/api/cache/clear", handler: () => (cache.clear(), clearWhatIfCache(), json({ ok: true })) });
 }
 
 function matchPattern(pattern: string, path: string): Record<string, string> | null {

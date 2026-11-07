@@ -42,7 +42,7 @@ export function DataPage(_: PageProps) {
     <div className="space-y-5">
       <PageHeader title="Data & provenance" subtitle="Which files were loaded, what the broker holds now, and whether the live weather stream is reaching the yield model." />
 
-      <div className="grid grid-cols-2 gap-4 rounded-card border border-border bg-surface p-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-5 rounded-card border border-border bg-surface p-4 lg:grid-cols-4">
         <Stat label="CSV files loaded" value={logs.data ? fmtNum(rows.length) : "…"} foot={lastLoad ? `last ${fmtDateTime(lastLoad)} (real time)` : undefined} source="LoadLog entities in the broker" />
         <Stat label="Rows loaded" value={logs.data ? fmtNum(totals.loaded) : "…"} foot={logs.data ? `of ${fmtNum(totals.read)} read` : undefined} source="Σ LoadLog.rowsLoaded" />
         <Stat label="Rows rejected" value={logs.data ? fmtNum(totals.rejected) : "…"} foot={logs.data ? (totals.rejected ? "▲ check the files below" : "every row passed") : undefined} source="Σ LoadLog.rowsRejected" />

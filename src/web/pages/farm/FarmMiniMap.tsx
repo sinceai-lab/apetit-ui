@@ -1,11 +1,15 @@
 // Small map of one farm: its parcels (contract ones coloured by Δ), the farm point and its weather cell.
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Map as MapIcon, Satellite } from "lucide-react";
 import type { Cell, Farm, Parcel, Prediction } from "@/shared/types";
 import { deltaColor } from "../../charts";
-import { boundsOf, L, mapInk, useLeaflet } from "../map/useLeaflet";
+import { Segmented } from "../../components/ui";
+import { boundsOf, L, mapInk, useLeaflet, type BasemapStyle } from "../map/useLeaflet";
 
 export function FarmMiniMap({ farm, parcels, preds, cell }: { farm: Farm; parcels: Parcel[]; preds: Prediction[]; cell: Cell | null }) {
-  const { ref, map, renderer, dark, tilesFailed } = useLeaflet();
+  const [style, setStyle] = useState<BasemapStyle>("map");
+  const sat = style === "satellite";
+  const { ref, map, renderer, dark, tilesFailed } = useLeaflet({ style });
 
   useEffect(() => {
     if (!map) return;
@@ -18,7 +22,7 @@ export function FarmMiniMap({ farm, parcels, preds, cell }: { farm: Farm; parcel
           [lat - 0.125, lon - 0.125],
           [lat + 0.125, lon + 0.125],
         ],
-        { renderer, weight: 1, dashArray: "4 3", color: mapInk(dark).cell, fillOpacity: 0.04, interactive: false },
+        { renderer, weight: 1, dashArray: "4 3", color: sat ? "#ffffff" : mapInk(dark).cell, fillOpacity: 0.04, interactive: false },
       ).addTo(g);
     }
     for (const p of parcels) {
@@ -34,17 +38,37 @@ export function FarmMiniMap({ farm, parcels, preds, cell }: { farm: Farm; parcel
       .bindTooltip(`Farm ${farm.farmId}`)
       .addTo(g);
     g.addTo(map);
-    const b = boundsOf([farm.location, ...parcels.map((p) => p.location)], 0.25);
-    if (b) map.fitBounds(b, { maxZoom: 14 });
     return () => {
       g.remove();
     };
-  }, [map, renderer, dark, farm, parcels, preds, cell]);
+  }, [map, renderer, dark, sat, farm, parcels, preds, cell]);
+
+  // Fit to the farm only when the farm or its parcels change, so switching basemap or theme keeps the user's zoom.
+  useEffect(() => {
+    if (!map) return;
+    const b = boundsOf([farm.location, ...parcels.map((p) => p.location)], 0.25);
+    if (b) map.fitBounds(b, { maxZoom: 14 });
+  }, [map, farm, parcels]);
 
   return (
     <div className="relative isolate overflow-hidden rounded-lg border border-border">
       <div ref={ref} className="h-64 w-full" role="region" aria-label={`Map of farm ${farm.farmId} and its parcels`} />
-      {tilesFailed && <span className="absolute right-2 top-2 z-[500] rounded-card bg-rapeseed-soft px-2.5 py-0.5 text-xs text-ink">Basemap unavailable</span>}
+      {/* Same Map / Satellite switch as the main Map page. Top-right: the attribution wraps to two lines at phone width
+          and would run under it at the bottom; the zoom buttons hold the top-left. */}
+      <div className="absolute right-2 top-2 z-[500]">
+        <Segmented
+          size="sm"
+          ariaLabel="Basemap"
+          value={style}
+          onChange={setStyle}
+          className="shadow-md"
+          options={[
+            { value: "map" as BasemapStyle, label: <><MapIcon className="size-3.5" aria-hidden />Map</> },
+            { value: "satellite" as BasemapStyle, label: <><Satellite className="size-3.5" aria-hidden />Satellite</> },
+          ]}
+        />
+      </div>
+      {tilesFailed && <span className="absolute right-2 top-12 z-[500] rounded-card bg-rapeseed-soft px-2.5 py-0.5 text-xs text-ink">Basemap unavailable</span>}
     </div>
   );
 }

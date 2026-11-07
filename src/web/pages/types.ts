@@ -9,6 +9,8 @@ export interface PageProps {
   query: URLSearchParams;
 }
 
+export type NavGroup = "season" | "planning" | "tools" | "tbd";
+
 export interface PageDef {
   id: string;
   /** Hash path pattern; ":x?" marks an optional segment. */
@@ -18,8 +20,12 @@ export interface PageDef {
   title: string;
   navLabel: string;
   icon: LucideIcon;
-  /** Shown in the sidebar / bottom bar. */
+  /** Shown in the sidebar (and the phone bar or its "More" sheet). */
   nav: boolean;
+  /** Sidebar section: live season data, scenario results, or tools. Keeps live and scenario numbers apart. */
+  group?: NavGroup;
+  /** One of the four tabs on the phone bottom bar; the rest go under "More". */
+  mobile?: boolean;
   /** Nav item to highlight when this page is open (e.g. Farm detail -> Live season). */
   navParent?: string;
   /** Whether the global region switch applies to this page. */

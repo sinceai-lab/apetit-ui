@@ -77,7 +77,7 @@ export function Table<R>({ columns, rows, rowKey, caption, onRowClick, initialSo
             <tr
               key={rowKey(r, i)}
               onClick={onRowClick ? () => onRowClick(r) : undefined}
-              className={cn("border-t border-border", onRowClick && "cursor-pointer hover:bg-brand-soft")}
+              className={cn("border-t border-border even:bg-surface-2", onRowClick && "cursor-pointer hover:bg-brand-soft")}
             >
               {columns.map((c, ci) => (
                 <td key={c.key} className={cn(pad, c.align === "right" && "tnum whitespace-nowrap text-right", ci === 0 && "whitespace-nowrap", c.className)}>

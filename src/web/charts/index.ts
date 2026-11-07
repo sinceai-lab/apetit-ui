@@ -8,4 +8,5 @@ export * from "./LineChart";
 export * from "./SmallMultiples";
 export * from "./CompletenessBar";
 export * from "./BulletBar";
+export * from "./DonutChart";
 export * from "./TableToggle";

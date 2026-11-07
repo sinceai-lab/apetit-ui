@@ -35,11 +35,11 @@ export function binDeltas(rows: Prediction[]): Bin[] {
   return bins;
 }
 
-export function DeltaHistogram({ bins, height = 150, ariaLabel }: { bins: Bin[]; height?: number; ariaLabel: string }) {
+export function DeltaHistogram({ bins, height = 172, ariaLabel }: { bins: Bin[]; height?: number; ariaLabel: string }) {
   const [ref, width] = useMeasure<HTMLDivElement>();
   const dark = useIsDark();
   const [tip, setTip] = useState<TooltipData | null>(null);
-  const m = { t: 8, r: 6, b: 30, l: 30 };
+  const m = { t: 8, r: 6, b: 46, l: 50 };
   const iw = Math.max(0, width - m.l - m.r);
   const ih = height - m.t - m.b;
   const max = Math.max(1, ...bins.map((b) => b.count));
@@ -92,6 +92,13 @@ export function DeltaHistogram({ bins, height = 150, ariaLabel }: { bins: Bin[];
               </text>
             );
           })}
+          {/* Axis titles with units. */}
+          <text transform={`translate(12 ${m.t + ih / 2}) rotate(-90)`} textAnchor="middle" style={{ fill: VIZ.ink, fontSize: 11, fontWeight: 600 }}>
+            Parcels (count)
+          </text>
+          <text x={m.l + iw / 2} y={height - 20} textAnchor="middle" style={{ fill: VIZ.ink, fontSize: 11, fontWeight: 600 }}>
+            Estimate vs usual yield (%)
+          </text>
           <text x={m.l} y={height - 4} style={{ fill: VIZ.muted, fontSize: 11 }}>
             ◀ below
           </text>

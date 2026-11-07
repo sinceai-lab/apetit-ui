@@ -24,8 +24,18 @@ export function BulletBar({ estimate, baseline, max, label, height = 14 }: Bulle
       {width > 0 && (
         <svg width={width} height={height + 6} role="img" aria-label={aria}>
           <rect x={0} y={3} width={width} height={height} rx={3} style={{ fill: "var(--surface-2)" }} />
-          {estimate != null && <rect x={0} y={3} width={x(estimate)} height={height} rx={3} style={{ fill: d != null ? deltaColor(d, dark) : VIZ.estimate }} />}
-          {estimate != null && <rect x={0} y={3 + height / 2 - 1.5} width={x(estimate)} height={3} style={{ fill: VIZ.estimate }} />}
+          {/* Solid Δ-coloured bar; the faint outline keeps near-usual (pale neutral) bars visible on the track. */}
+          {estimate != null && (
+            <rect
+              x={0.5}
+              y={3.5}
+              width={Math.max(0, x(estimate) - 1)}
+              height={height - 1}
+              rx={2.5}
+              style={{ fill: d != null ? deltaColor(d, dark) : VIZ.estimate, stroke: VIZ.baseline, strokeOpacity: 0.45 }}
+              strokeWidth={1}
+            />
+          )}
           {baseline != null && <line x1={x(baseline)} x2={x(baseline)} y1={0} y2={height + 6} style={{ stroke: VIZ.ink }} strokeWidth={2} />}
         </svg>
       )}

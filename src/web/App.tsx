@@ -4,6 +4,8 @@ import { Shell } from "./components/shell/Shell";
 import { EmptyState } from "./components/ui";
 import { AppDataProvider } from "./lib/appData";
 import { PrefsProvider } from "./lib/prefs";
+import { ChatProvider } from "./pages/assistant/ChatProvider";
+import { ChatWidget } from "./pages/Assistant";
 import { matchPath, useLocation } from "./lib/router";
 
 function resolve(path: string) {
@@ -41,7 +43,10 @@ export function App() {
   return (
     <PrefsProvider>
       <AppDataProvider>
-        <Routes />
+        <ChatProvider>
+          <Routes />
+          <ChatWidget />
+        </ChatProvider>
       </AppDataProvider>
     </PrefsProvider>
   );

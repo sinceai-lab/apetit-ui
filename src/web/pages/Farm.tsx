@@ -9,8 +9,10 @@ import { cropLabel, fmtFixed, fmtHa, fmtNum, fmtTHa } from "../lib/format";
 import { href } from "../lib/router";
 import { useApi } from "../lib/usePoll";
 import { CellWeather } from "./farm/CellWeather";
+import { ClimateOutlook } from "./farm/climate/ClimateOutlook";
 import { FarmFinder } from "./farm/FarmFinder";
 import { FarmMiniMap } from "./farm/FarmMiniMap";
+import { LandUse } from "./farm/LandUse";
 import { ParcelHistory } from "./farm/ParcelHistory";
 import { SourceDrawer } from "./farm/SourceDrawer";
 import { CropDot, Delta, EarlySeasonNote, LiveNote, modeOf, predictionSource, regionFlag, weightedDelta } from "./season/common";
@@ -48,7 +50,7 @@ function FarmDetail({ farmId }: { farmId: string }) {
   }
   if (!d.data)
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-5">
         <Skeleton className="h-16 w-72" />
         <Skeleton className="h-32" />
         <Skeleton className="h-80" />
@@ -116,7 +118,7 @@ function FarmDetail({ farmId }: { farmId: string }) {
       {predictions.length > 0 ? (
         <Panel title="This season's estimate" subtitle={<LiveNote asOfDate={asOf} observed={modeOf(predictions.map((p) => p.observedDays))} total={modeOf(predictions.map((p) => p.totalDays))} filledAhead={modeOf(predictions.map((p) => p.filledFutureDays))} />}>
           <EarlySeasonNote asOfDate={asOf} />
-          <div className="mt-2 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div className="mt-2 grid grid-cols-2 gap-5 sm:grid-cols-4">
             <Stat label="Estimated yield" value={fmtFixed(area ? est / area : null, 2)} unit="t/ha" source={predictionSource(predictions)} />
             <Stat label="vs usual yield" value={<Delta value={weightedDelta(predictions)} size="xl" />} foot="area-weighted, this farm's history" />
             <Stat label="Estimated harvest" value={fmtNum(est)} unit="t" source={predictionSource(predictions)} />
@@ -130,12 +132,16 @@ function FarmDetail({ farmId }: { farmId: string }) {
         <EmptyState title="No live estimate for this farm">None of its parcels has an Apetit contract crop the yield model covers this season.</EmptyState>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <ClimateOutlook farm={farm} />
+
+      <div className="grid gap-5 lg:grid-cols-2">
         <ContractFacts farm={farm} />
         <Panel title="Where it is" subtitle={cell ? `Nearest weather grid cell ${cell.cellId} (dashed square), ${fmtNum(cell.elevationM)} m above sea level` : undefined}>
           <FarmMiniMap farm={farm} parcels={parcels} preds={predictions} cell={cell} />
         </Panel>
       </div>
+
+      <LandUse farm={farm} parcels={parcels} preds={predictions} />
 
       <ParcelsTable parcels={parcels} preds={predictions} />
 
@@ -172,7 +178,7 @@ function ParcelBullets({ preds }: { preds: Prediction[] }) {
         ],
       }}
     >
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-5">
         {crops.map((c) => {
           const rows = sorted.filter((p) => p.crop === c);
           const max = Math.max(...rows.map((p) => Math.max(p.yieldTHa, p.baselineTHa ?? 0))) * 1.15;
@@ -230,7 +236,7 @@ function ContractFacts({ farm }: { farm: Farm }) {
       {!crops.length ? (
         <EmptyState title="No survey or contract facts on file for this farm" />
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-5">
           {crops.map(([crop, facts]) => {
             const main = FACTS.filter((f) => f.key in facts);
             const extra = Object.entries(facts).filter(([k]) => !FACTS.some((f) => f.key === k) && k !== "calculator_note");

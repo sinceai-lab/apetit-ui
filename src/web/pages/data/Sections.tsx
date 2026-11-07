@@ -76,8 +76,8 @@ export function InferenceCounters({ health, obs }: { health: LiveHealthResponse 
   const last = health?.health.last_notification;
   const rejected = obs?.recent_rejected ?? [];
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-5 sm:grid-cols-4">
         <Stat label="Weather pushes received" value={fmtNum(c.notifications)} foot={last?.received_at ? `last ${fmtAgo(last.received_at)} (real time)` : undefined} source="inference /health counters" />
         <Stat label="New daily readings" value={fmtNum(c.readings_new)} foot="stored for the model" source="inference /health counters" />
         <Stat label="Outside growing season" value={fmtNum(c.readings_out_of_season)} foot="kept, not used" source="inference /health counters" />

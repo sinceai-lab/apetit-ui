@@ -28,13 +28,17 @@ export function SeasonPage({ query }: PageProps) {
       <PageHeader
         title="Live season"
         subtitle="Estimated yield for each contract crop, compared with each farm's usual yield. Estimates update as new weather comes in."
-        actions={<DeltaLegend />}
-      />
-      <Segmented
-        ariaLabel="Crop"
-        value={crop}
-        onChange={(c) => setQuery({ crop: c, farm: null })}
-        options={CROPS.map((c) => ({ value: c, label: <><CropDot crop={c} />{cropLabel(c)}</> }))}
+        below={
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+            <Segmented
+              ariaLabel="Crop"
+              value={crop}
+              onChange={(c) => setQuery({ crop: c, farm: null })}
+              options={CROPS.map((c) => ({ value: c, label: <><CropDot crop={c} />{cropLabel(c)}</> }))}
+            />
+            <DeltaLegend />
+          </div>
+        }
       />
       {preds.data && <UpstreamBanner errors={preds.data.errors} stale={preds.data.stale} />}
       {preds.data && <EarlySeasonNote asOfDate={preds.data.asOfDate} />}
@@ -42,14 +46,14 @@ export function SeasonPage({ query }: PageProps) {
       {preds.error && !preds.data ? (
         <ErrorState error={preds.error} onRetry={preds.refresh} />
       ) : !preds.data ? (
-        <div className={regions.length > 1 ? "grid gap-4 lg:grid-cols-2" : ""}>
+        <div className={regions.length > 1 ? "grid gap-5 lg:grid-cols-2" : ""}>
           {regions.map((r) => (
             <Skeleton key={r} className="h-96" />
           ))}
         </div>
       ) : (
         <>
-          <div className={regions.length > 1 ? "grid gap-4 lg:grid-cols-2" : "grid gap-4"}>
+          <div className={regions.length > 1 ? "grid gap-5 lg:grid-cols-2" : "grid gap-5"}>
             {regions.map((r) => (
               <CropRegion key={r} crop={crop} region={r} rows={filterPredictions(rows, { region: r })} wide={regions.length === 1} />
             ))}
@@ -88,8 +92,8 @@ function CropRegion({ crop, region, rows, wide }: { crop: Crop; region: Region; 
       subtitle={<LiveNote asOfDate={s.asOfDate} />}
     >
       <div className={wide ? "grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]" : "flex flex-col gap-5"}>
-        <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-2 gap-4">
+        <div className="flex flex-col gap-5">
+          <div className="grid grid-cols-2 gap-5">
             <Stat label="Estimated yield" value={fmtTHa(s.estTHa).replace(" t/ha", "")} unit="t/ha" delta={<Delta value={s.deltaPct} />} source={src} />
             <Stat label="Usual yield (farm average)" value={fmtTHa(s.baseTHa).replace(" t/ha", "")} unit="t/ha" source="baselineYield: each farm's historical mean for this crop" />
             <Stat label="Contract area" value={fmtNum(s.areaHa)} unit="ha" foot={`${fmtNum(s.parcels)} parcels · ${fmtNum(s.farms)} farms`} />
@@ -162,7 +166,7 @@ function FarmDrill({ crop, rows, showRegion, farm }: { crop: Crop; rows: Predict
     { key: "d", header: "Δ", align: "right", render: (f) => <Delta value={f.deltaPct} />, sortValue: (f) => f.deltaPct },
   ];
   return (
-    <div className={selected ? "grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]" : ""}>
+    <div className={selected ? "grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]" : ""}>
       <Panel title={`${cropLabel(crop)} farms`} subtitle={`${fmtNum(farms.length)} farms. Click a row to see its parcels, or the farm id for full details.`}>
         <Table
           dense
@@ -191,7 +195,7 @@ function FarmParcels({ farm, rows, crop }: { farm: FarmSummary; rows: Prediction
         </Button>
       }
     >
-      <div className="mb-3 flex flex-wrap items-center gap-4">
+      <div className="mb-3 flex flex-wrap items-center gap-5">
         <Stat label="Estimated yield" value={fmtTHa(farm.estTHa).replace(" t/ha", "")} unit="t/ha" delta={<Delta value={farm.deltaPct} />} source={predictionSource(rows)} />
         <Stat label="Area" value={fmtNum(farm.areaHa, 1)} unit="ha" />
       </div>

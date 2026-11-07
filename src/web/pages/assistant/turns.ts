@@ -60,3 +60,35 @@ export function resultSummary(r: ToolResult | undefined): string | null {
   const kb = r.content.length / 1024;
   return kb >= 1 ? `${kb.toFixed(0)} KB of data` : "done";
 }
+
+/** A broker entity a chat answer was based on, for the provenance (Source) drawer. */
+export interface SourceEntity {
+  id: string;
+  label: string;
+}
+
+// NGSI-LD ids in tool output, e.g. "urn:ngsi-ld:Farm:F0001" or "urn:ngsi-ld:Parcel:F0001-P03".
+const ENTITY_RX = /urn:ngsi-ld:([A-Za-z][A-Za-z0-9]*):([A-Za-z0-9][A-Za-z0-9_.\-]*)/g;
+// Bookkeeping types, not data the answer is about.
+const SKIP_TYPES = new Set(["LoadLog", "EntityTypeList", "Subscription"]);
+const MAX_SOURCES = 40;
+
+/** Entities found in an answer's tool results; those the answer text names come first. */
+export function sourcesOf(results: (ToolResult | undefined)[], answerText: string): SourceEntity[] {
+  const seen = new Map<string, SourceEntity & { order: number }>();
+  let order = 0;
+  for (const r of results) {
+    if (!r || r.isError) continue;
+    for (const m of r.content.matchAll(ENTITY_RX)) {
+      const [id, type, local] = m as unknown as [string, string, string];
+      if (SKIP_TYPES.has(type) || seen.has(id)) continue;
+      seen.set(id, { id, label: `${type.replace(/([a-z])([A-Z])/g, "$1 $2")} ${local}`, order: order++ });
+    }
+  }
+  const text = answerText.toLowerCase();
+  const named = (e: SourceEntity) => text.includes(e.label.split(" ").pop()!.toLowerCase());
+  return [...seen.values()]
+    .sort((a, b) => Number(named(b)) - Number(named(a)) || a.order - b.order)
+    .slice(0, MAX_SOURCES)
+    .map(({ id, label }) => ({ id, label }));
+}

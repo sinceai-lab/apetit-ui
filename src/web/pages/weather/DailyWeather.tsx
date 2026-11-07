@@ -47,8 +47,8 @@ export function DailyWeather({ cellId, scenario, days }: { cellId: string; scena
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4 rounded-card border border-border bg-surface p-4 lg:grid-cols-5" title={src}>
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-5 rounded-card border border-border bg-surface p-4 lg:grid-cols-5" title={src}>
         <Stat label="Mean temperature" value={fmtFixed(s.tMean)} unit="°C" foot={`${fmtNum(s.frostDays)} frost nights`} source={src} />
         <Stat label="Rain this season" value={fmtNum(s.rain)} unit="mm" foot={`${fmtNum(s.rainDays)} days with ≥ 1 mm`} source={src} />
         <Stat label="Evaporation demand" value={fmtNum(s.et0)} unit="mm" foot="reference ET0" source={src} />
@@ -72,7 +72,7 @@ export function DailyWeather({ cellId, scenario, days }: { cellId: string; scena
         </TableToggle>
       </Panel>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-5 lg:grid-cols-2">
         <Panel title="Rain per day" subtitle={s.wettest ? `Wettest day: ${fmtFixed(s.wettest.precip)} mm on ${fmtDayMonth(s.wettest.date)}` : undefined}>
           <TableToggle table={dayTable} toolbar={<Legend items={[{ label: "Rain (mm/day)", color: VIZ.precip }]} />}>
             <LineChart series={rainSeries} xType="time" formatX={dayFmt} formatY={(v) => `${Math.round(v)}`} ariaLabel={`Daily rain for ${cellId}`} height={200} />
@@ -87,7 +87,7 @@ export function DailyWeather({ cellId, scenario, days }: { cellId: string; scena
 
       <Panel title="Month by month" subtitle="Rain and evaporation per month. Ask about any month here instead of adding up days.">
         <TableToggle table={{ columns: monthCols, rows: months, rowKey: (r) => r.month }} defaultView="chart" toolbar={<Legend items={[{ label: "Rain", color: VIZ.precip }, { label: "ET0", color: VIZ.et0 }]} />}>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-2">
             <div>
               <div className="mb-1 text-xs font-medium text-muted">Rain (mm)</div>
               <BarChart

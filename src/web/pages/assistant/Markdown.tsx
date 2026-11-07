@@ -151,7 +151,7 @@ export function Markdown({ text }: { text: string }) {
                   </thead>
                   <tbody>
                     {b.rows.map((r, ri) => (
-                      <tr key={ri} className="border-t border-border">
+                      <tr key={ri} className="border-t border-border even:bg-surface-2">
                         {b.head.map((_, j) => {
                           const c = r[j] ?? "";
                           const num = NUMERIC.test(c);

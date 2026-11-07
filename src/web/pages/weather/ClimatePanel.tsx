@@ -64,8 +64,8 @@ function ClimateBody({ points, attr, f, digits }: { points: ClimatePoint[]; attr
   const signed = (v: number | null) => (v == null ? "–" : `${v > 0 ? "+" : v < 0 ? "−" : "±"}${fmtFixed(Math.abs(v), digits)}`);
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-5 sm:grid-cols-4">
         <Stat label="Usual (1991–2020)" value={normal == null ? "–" : fmtFixed(normal, digits)} unit={info.unit} foot={attr === "precip_mm" && june != null ? `June usually ${fmtNum(june)} mm` : info.annualLabel} />
         {(["ssp126", "ssp245", "ssp585"] as const).map((s) => (
           <Stat key={s} label={<span className="inline-flex items-center gap-1"><span className="inline-block size-2 rounded-full" style={{ background: SCENARIO_COLOR[s] }} />2041–2060 · {s.toUpperCase().replace("SSP", "SSP ")}</span>} value={signed(delta(mid(s)))} unit={info.unit} foot={`vs usual · ${f(mid(s))}`} />

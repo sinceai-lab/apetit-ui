@@ -88,7 +88,7 @@ function Summary({ services, checkedAt }: { services: ServiceStatus[]; checkedAt
   const median = lat.length ? [...lat].sort((a, b) => a - b)[Math.floor(lat.length / 2)] : null;
   const allOk = !deg.length && !down.length;
   return (
-    <Card className="mb-6 grid gap-4 p-4 sm:grid-cols-[auto_1fr_auto] sm:items-center">
+    <Card className="mb-6 grid gap-5 p-4 sm:grid-cols-[auto_1fr_auto] sm:items-center">
       <div className="flex items-baseline gap-2">
         <span className="tnum text-[32px] font-semibold leading-none text-heading">{up}</span>
         <span className="text-sm text-muted">of {services.length} services up</span>

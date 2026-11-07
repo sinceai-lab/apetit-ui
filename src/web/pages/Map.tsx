@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { ArrowRight, CloudSun, Layers, MousePointerClick, X } from "lucide-react";
+import { ArrowRight, CloudSun, Layers, Map as MapIcon, MousePointerClick, Satellite, X } from "lucide-react";
 import { CROPS, type Cell, type Farm, type ParcelMin, type Prediction } from "@/shared/types";
 import type { PageProps } from "./types";
 import { Button, Card, EmptyState, ErrorState, LinkButton, PageHeader, Segmented, UpstreamBanner } from "../components/ui";
@@ -10,24 +10,32 @@ import { cropLabel, fmtDate, fmtHa, fmtNum, fmtTHa, regionLabel } from "../lib/f
 import { useRegion } from "../lib/prefs";
 import { href, setQuery } from "../lib/router";
 import { POLL, useApi } from "../lib/usePoll";
-import { boundsOf, L, mapInk, useLeaflet } from "./map/useLeaflet";
+import { boundsOf, L, mapInk, useLeaflet, type BasemapStyle } from "./map/useLeaflet";
+import { FIELD_MIN_ZOOM, useFieldShapes, type ParcelPoint } from "./map/useFieldShapes";
 import { CropDot, Delta, LiveNote, regionFlag, weightedDelta } from "./season/common";
+import { ClimateMapPage, MapLayerSwitch, mapLayer } from "./map/climate/LayerSwitch";
 
 type Sel = { kind: "parcel" | "farm" | "cell"; id: string } | null;
 type CropFilter = "all" | (typeof CROPS)[number];
 
-export function MapPage({ query }: PageProps) {
+export function MapPage(props: PageProps) {
+  return mapLayer(props.query) === "climate" ? <ClimateMapPage {...props} /> : <LiveMapPage {...props} />;
+}
+
+function LiveMapPage({ query }: PageProps) {
   const [region] = useRegion();
   const crop = ((CROPS as string[]).includes(query.get("crop") ?? "") ? query.get("crop") : "all") as CropFilter;
-  const [layers, setLayers] = useState({ cells: true, predicted: true, other: false, farms: false, basemap: true });
+  const [layers, setLayers] = useState({ cells: true, predicted: true, other: false, farms: false, fields: true, basemap: true });
+  const [style, setStyle] = useState<BasemapStyle>("map");
   const [sel, setSel] = useState<Sel>(null);
+  const focusParcel = query.get("parcel");
 
   const cells = useApi((s) => api.cells(region, s), [region]);
   const preds = useApi((s) => api.predictions({ region }, s), [region], { intervalMs: POLL.predictions });
   const parcels = useApi((s) => api.parcelsMin({ region }, s), [region]);
   const farms = useApi((s) => api.farms(region, s), [region]);
 
-  const { ref, map, renderer, dark, tilesFailed } = useLeaflet({ basemap: layers.basemap });
+  const { ref, map, renderer, dark, tilesFailed } = useLeaflet({ basemap: layers.basemap, style });
 
   const parcelById = useMemo(() => new Map((parcels.data?.parcels ?? []).map((p) => [p[0], p] as const)), [parcels.data]);
   const rows = useMemo(() => (preds.data?.predictions ?? []).filter((p) => crop === "all" || p.crop === crop), [preds.data, crop]);
@@ -42,14 +50,37 @@ export function MapPage({ query }: PageProps) {
     return m;
   }, [rows]);
 
+  // Real field shapes (Finland): a field is coloured when a contract parcel point falls inside it.
+  const points = useMemo<ParcelPoint[]>(() => {
+    const out: ParcelPoint[] = [];
+    for (const [pid, ps] of predByParcel) {
+      const loc = parcelById.get(pid);
+      if (loc) out.push([loc[4], loc[5], pid, deltaColor(ps[0]!.deltaPct, dark)]);
+    }
+    return out;
+  }, [predByParcel, parcelById, dark]);
+  const fields = useFieldShapes({ map, renderer, enabled: layers.fields && region !== "SE_SKANE", points, satellite: style === "satellite" && layers.basemap, dark, onParcel: (id) => setSel({ kind: "parcel", id }) });
+  const fieldsShown = fields.zoomedIn && layers.fields && region !== "SE_SKANE";
+
   // Fit the view once per region when the cells arrive.
   const fitted = useRef<{ map: unknown; region: string } | null>(null);
   useEffect(() => {
     if (!map || !cells.data || (fitted.current?.map === map && fitted.current.region === region)) return;
     const b = boundsOf(cells.data.cells.map((c) => c.location), 0.05);
-    if (b) map.fitBounds(b);
+    if (b && !focusParcel) map.fitBounds(b);
     fitted.current = { map, region };
-  }, [map, cells.data, region]);
+  }, [map, cells.data, region, focusParcel]);
+
+  // "?parcel=ID" (from the top-bar search): select the parcel and zoom to its field.
+  const focused = useRef<string | null>(null);
+  useEffect(() => {
+    if (!map || !focusParcel || focused.current === focusParcel) return;
+    const p = parcelById.get(focusParcel);
+    if (!p) return;
+    focused.current = focusParcel;
+    setSel({ kind: "parcel", id: focusParcel });
+    map.setView([p[5], p[4]], 14);
+  }, [map, focusParcel, parcelById]);
 
   useEffect(() => {
     if (!map || !layers.cells || !cells.data) return;
@@ -63,7 +94,8 @@ export function MapPage({ query }: PageProps) {
           [lat - 0.125, lon - 0.125],
           [lat + 0.125, lon + 0.125],
         ],
-        { renderer, weight: 1, color: mapInk(dark).grid, fillColor: ps ? deltaColor(d, dark) : mapInk(dark).empty, fillOpacity: ps ? 0.42 : 0.25 },
+        // Once real field shapes show, the grid fades to an outline so the fields stay readable.
+        { renderer, weight: 1, color: mapInk(dark).grid, fillColor: ps ? deltaColor(d, dark) : mapInk(dark).empty, fillOpacity: fieldsShown ? 0.08 : ps ? 0.42 : 0.25 },
       )
         .on("click", () => setSel({ kind: "cell", id: c.cellId }))
         .addTo(g);
@@ -72,7 +104,7 @@ export function MapPage({ query }: PageProps) {
     return () => {
       g.remove();
     };
-  }, [map, renderer, layers.cells, cells.data, byCell, dark]);
+  }, [map, renderer, layers.cells, cells.data, byCell, dark, fieldsShown]);
 
   useEffect(() => {
     if (!map || !layers.other || !parcels.data) return;
@@ -126,11 +158,13 @@ export function MapPage({ query }: PageProps) {
   const toggle = (k: keyof typeof layers) => setLayers((l) => ({ ...l, [k]: !l[k] }));
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       <PageHeader
         title="Map"
         subtitle={`Contract parcels coloured by estimated yield vs usual, on the 0.25° weather grid. ${regionLabel(region)}.`}
         actions={
+          <>
+          <MapLayerSwitch value="live" />
           <Segmented
             size="sm"
             ariaLabel="Crop"
@@ -138,21 +172,45 @@ export function MapPage({ query }: PageProps) {
             onChange={(c) => setQuery({ crop: c === "all" ? null : c })}
             options={[{ value: "all" as CropFilter, label: "All crops" }, ...CROPS.map((c) => ({ value: c as CropFilter, label: <><CropDot crop={c} />{cropLabel(c)}</> }))]}
           />
+          </>
         }
       />
       {preds.data && <UpstreamBanner errors={preds.data.errors} stale={preds.data.stale} />}
       {errs && <ErrorState error={errs} onRetry={() => [cells, preds, parcels].forEach((s) => s.refresh())} />}
 
-      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
         <Card className="relative isolate overflow-hidden">
           <div ref={ref} className="h-[62dvh] min-h-[380px] w-full" role="region" aria-label="Map of farms, parcels and weather cells" />
+          <div className="absolute bottom-6 left-2 z-[500]">
+            <Segmented
+              size="sm"
+              ariaLabel="Basemap"
+              value={style}
+              onChange={(v) => {
+                setStyle(v);
+                if (!layers.basemap) toggle("basemap");
+              }}
+              className="shadow-md"
+              options={[
+                { value: "map" as BasemapStyle, label: <><MapIcon className="size-3.5" aria-hidden />Map</> },
+                { value: "satellite" as BasemapStyle, label: <><Satellite className="size-3.5" aria-hidden />Satellite</> },
+              ]}
+            />
+          </div>
           <div className="pointer-events-none absolute inset-x-2 top-2 z-[500] flex flex-wrap justify-end gap-1.5">
             {loading && <span className="pointer-events-auto rounded-card border border-border bg-surface px-3 py-1 text-xs text-muted">Loading map data…</span>}
+            {layers.fields && region !== "SE_SKANE" && !fields.zoomedIn && (
+              <button type="button" onClick={() => map?.setZoom(FIELD_MIN_ZOOM)} className="pointer-events-auto rounded-card border border-border bg-surface px-3 py-1 text-xs font-medium text-ink shadow-sm hover:border-brand">
+                Zoom in to see real field shapes
+              </button>
+            )}
+            {fields.loading && <span className="pointer-events-auto rounded-card border border-border bg-surface px-3 py-1 text-xs text-muted">Loading field shapes…</span>}
+            {fields.failed && <span className="pointer-events-auto rounded-card bg-rapeseed-soft px-3 py-1 text-xs text-ink">Some field shapes couldn't load</span>}
             {tilesFailed && layers.basemap && <span className="pointer-events-auto rounded-card bg-rapeseed-soft px-3 py-1 text-xs text-ink">Basemap unavailable, data still shown</span>}
           </div>
         </Card>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-5">
           <Card className="p-4">
             {sel ? (
               <SelectionPanel sel={sel} onClose={() => setSel(null)} parcel={sel.kind === "parcel" ? parcelById.get(sel.id) : undefined} preds={preds.data?.predictions ?? []} cells={cells.data?.cells ?? []} farms={farms.data?.farms ?? []} />
@@ -188,14 +246,21 @@ export function MapPage({ query }: PageProps) {
               <LayerToggle on={layers.farms} onClick={() => toggle("farms")} swatch={<span className="size-3 rounded-full border-[2.5px] border-brand bg-surface" />}>
                 Farms {farms.data ? `(${fmtNum(farms.data.farms.length)})` : ""}
               </LayerToggle>
+              <LayerToggle on={layers.fields} onClick={() => toggle("fields")} swatch={<span className="size-3 rounded-[2px] border-[1.5px] border-muted" />}>
+                Real field shapes, Finland{fields.zoomedIn && layers.fields && region !== "SE_SKANE" ? ` (${fmtNum(fields.shown)}, ${fmtNum(fields.matched)} with a contract parcel)` : ""}
+              </LayerToggle>
               <LayerToggle on={layers.basemap} onClick={() => toggle("basemap")} swatch={<span className="size-3 rounded-[2px] bg-surface-2" />}>
-                Basemap
+                {style === "satellite" ? "Satellite imagery" : "Basemap"}
               </LayerToggle>
             </div>
             <div className="mt-3 border-t border-border pt-3">
               <div className="mb-1 text-xs text-muted">Estimate vs usual yield</div>
               <DeltaLegend />
             </div>
+            <p className="mt-3 text-[11px] leading-snug text-muted">
+              Field shapes are the real 2025 parcel register from the{" "}
+              <a className="link" href="https://www.ruokavirasto.fi/en/about-us/open-information/" target="_blank" rel="noreferrer">Finnish Food Authority</a> (CC BY 4.0), shown from zoom {FIELD_MIN_ZOOM}. Contract parcels are synthetic points; a field is coloured when one falls inside it. No shapes for Sweden.
+            </p>
           </Card>
         </div>
       </div>
@@ -205,9 +270,9 @@ export function MapPage({ query }: PageProps) {
 
 function LayerToggle({ on, onClick, swatch, children }: { on: boolean; onClick: () => void; swatch: ReactNode; children: ReactNode }) {
   return (
-    <button type="button" role="switch" aria-checked={on} onClick={onClick} className={cn("flex items-center gap-2 rounded-lg px-2 py-1 text-left transition-colors hover:bg-surface-2", on ? "text-ink" : "text-muted")}>
-      <span aria-hidden className={cn("inline-flex h-4 w-7 shrink-0 items-center rounded-full p-0.5 transition-colors", on ? "bg-brand" : "bg-border")}>
-        <span className={cn("size-3 rounded-full bg-surface transition-transform", on && "translate-x-3")} />
+    <button type="button" role="switch" aria-checked={on} onClick={onClick} className={cn("flex items-center gap-2.5 rounded-lg border px-2.5 py-1.5 text-left transition-colors", on ? "border-border bg-surface text-ink hover:border-brand" : "border-transparent text-muted hover:border-border hover:bg-surface-2 hover:text-ink")}>
+      <span aria-hidden className={cn("inline-flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition-colors", on ? "bg-brand" : "bg-muted/45")}>
+        <span className={cn("size-4 rounded-full bg-white shadow-sm transition-transform", on && "translate-x-4")} />
       </span>
       <span className="inline-flex w-5 justify-center">{swatch}</span>
       <span className="min-w-0 flex-1">{children}</span>

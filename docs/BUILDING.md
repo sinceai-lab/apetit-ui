@@ -4,10 +4,14 @@ The foundation is in place: the server, every API route, the theme, the shell, t
 
 ## Ownership (so two agents never touch the same file)
 
-| Agent | Files |
+The first round of pages (Overview, Live season, Map, Farm, Weather, Assistant, Data, Services) is built. The insight pages (contract §10.3) are split between two builders:
+
+| Builder | Files |
 |---|---|
-| A | `pages/Overview.tsx`, `pages/Season.tsx`, `pages/Map.tsx`, `pages/Farm.tsx` (+ `pages/overview/`, `pages/season/`, `pages/map/`, `pages/farm/`) |
-| B | `pages/Weather.tsx`, `pages/Assistant.tsx`, `pages/Data.tsx`, `pages/Services.tsx` (+ `pages/weather/`, `pages/assistant/`, `pages/data/`, `pages/services/`) |
+| A: Outlook + Risk & advice (+ Farm additions) | `pages/Outlook.tsx`, `pages/Advice.tsx` (+ `pages/outlook/`, `pages/advice/`), and the Climate outlook section of `pages/Farm.tsx`, built in a new `pages/farm/climate/` folder and mounted from `Farm.tsx` with one import and one element |
+| B: Try the model + Model trust (+ Map additions) | `pages/Try.tsx`, `pages/Trust.tsx` (+ `pages/try/`, `pages/trust/`), and the climate layer, panels and "Farms to contact first" table of `pages/Map.tsx`, built in a new `pages/map/climate/` folder and mounted from `Map.tsx` with the smallest possible edit |
+
+`Farm.tsx` belongs to A and `Map.tsx` to B; neither edits the other's file or folder. A component both need (for example a story toggle or a basis chip) is built page-local in each folder, or asked for in the report, rather than added to `components/`.
 
 **Shared files, don't edit:** `package.json`, `src/server/**`, `src/shared/**`, `src/web/{App,main}.tsx`, `src/web/styles.css`, `src/web/lib/**`, `src/web/components/**`, `src/web/charts/**`, `src/web/pages/{registry.tsx,types.ts,Placeholder.tsx}`.
 
@@ -32,9 +36,15 @@ The app uses a hash router (`src/web/lib/router.tsx`). The registry (`pages/regi
 | Map | `#/map` | `MapPage` (wide) | yes |
 | Farm detail | `#/farm/:farmId?` | `FarmPage` | no |
 | Weather | `#/weather/:cellId?` | `WeatherPage` | yes |
+| Outlook | `#/outlook?crop=&scenario=` | `OutlookPage` | yes |
+| Risk & advice | `#/advice?crop=&story=` | `AdvicePage` | yes |
+| Try the model | `#/try?parcel=&crop=&weather=&year=&irrigation=` | `TryPage` | yes |
+| Model trust | `#/trust?test=&crop=` | `TrustPage` | no (both regions in separate rows) |
 | Assistant | `#/assistant` | `AssistantPage` | no |
 | Data & provenance | `#/data` | `DataPage` | no |
 | Services | `#/services/:embed?` (`c3`, `streamlit`) | `ServicesPage` (wide) | no |
+
+**Navigation.** The sidebar has three groups: *This season* (Overview, Live season, Map, Weather), *Climate & planning* (Outlook, Risk & advice, Try the model, Model trust) and *Tools* (Assistant, Data & provenance, Services). Grouping keeps live estimates and scenario results apart, which is the labelling rule in §10.1. A 390 px phone bar can't hold 11 tabs, so it shows Overview, Season, Map and Advice (`mobile: true` in the registry) plus **More**, a sheet with every page in the same groups. A page reached through More lights up the More tab.
 
 Every page receives `{ params, query }` (`PageProps`). The router helpers are:
 
@@ -61,6 +71,9 @@ const preds = useApi((s) => api.predictions({ region, crop }, s), [region, crop]
 - **`lib/format.ts`**: `fmtNum`, `fmtFixed`, `fmtCompact`, `fmtHa`, `fmtTonnes`, `fmtTHa`, `fmtDelta` (signed, e.g. "+4.2 %"), `fmtShare`, `fmtDate` (data dates, e.g. "27 Oct 2027"), `fmtDayMonth`, `fmtDateTime` / `fmtTime` / `fmtAgo` (wall-clock timestamps), `shortHash`, `cropLabel`, `regionLabel`.
 - **`lib/chatClient.ts`**: `streamChat(messages, {onEvent, signal, provider?, model?})` posts to `/api/chat` and parses the SSE stream. It already compacts history: tool output is truncated to 8,000 characters and only the last 12 user turns are kept. Leave out `model` so the bot's default (sonnet) is used. An abort throws `AbortError`, which the caller should catch.
 - **`src/shared/chat.ts`**: the `Msg`, `ToolCall`, `ToolResult` and `AgentEvent` types, `STARTER_PROMPTS`, `toolLabel(name)` and `TOOL_RESULT_DISPLAY_CHARS` (4,000).
+- **Insights (`lib/insights.ts`, types in `src/shared/insights.ts`)**: `insightsApi.*` has one function per `/api/insights/*` route, and the hooks wrap them: `useInsightsOptions({region, crop, farm})`, `useAdvice(region, crop, story)`, `usePolicy()`, `useOutlook(region, crop)`, `useClimateRisk(scenario)`, `useEuroRisk()`, `useClimateFarms(region, crop)`, `useSoilEffects(region, crop)`, `useFarmStory(farmId, crop, story)`, `useFieldStory(parcelId, crop, story)`, `useTrust(test)`, `useTrustSeasons(region, crop, test, farm?)`, `useLiveReplay(test, scope?)`, `useCorrections()` and `useInsightsMeta()`. Pass `null` for a missing required input and the hook waits. Hooks take a single `Region`: with "Both", call them once per region and show the two side by side. `useWhatIf()` returns `{run(body), data, error, loading, body}` and only calls the server from `run` (the Run button). `basisChip(basis)` gives the chip text, e.g. "Scenario result · model 5cf88f33 · file 7 Nov 2026". Codes and constants (`STORIES`, `WEATHER_SETS`, `IRRIGATIONS`, `STORY_SSP`) are in `shared/insights.ts`; picker labels come from `useInsightsOptions()`.
+  - **Rules:** no arithmetic on insight figures in a page (no sums, means or differences), only formatting and sorting. A missing number is asked for in `model-inference/docs/INSIGHTS_API.md`, not computed. Never put a scenario result in the same chart or KPI as a live estimate, and never add Finland and Sweden together. Shares and changes are fractions (`fmtShare`/`fmtDelta(x * 100)`), except keys ending in `Pct`, which are already percent.
+  - **What-if errors:** 400 (bad pickers), 404 (no weather for that combination, e.g. a Swedish crop other than pea), 429 (more than 20 runs a minute; show the message and let the user retry). A response with `degraded: "drivers unavailable"` has only `prediction`; hide "Why this number".
 - **`src/shared/aggregate.ts`** (pure, usable in pages): `filterPredictions`, `cropSummaries`, `farmSummaries`, `needsAttention(rows, 5)`, `weightedMean`, `latestAsOf` and `BELOW_BASELINE_PCT` (-5).
 
 ## UI primitives (`src/web/components/ui`, import from `../components/ui`)
@@ -116,6 +129,7 @@ The routes are exactly as in CONTRACT §5.3. Everything else returns 404 (unknow
 - **Upstream failures:** a single-source route answers `503 {error, upstream}` when the upstream is unreachable and `502` when it returns an error. With a stale cache it still answers `200` with `stale: true`.
 - **Data source:** `/api/live/*` reports `source: "backend" | "inference"`.
 - **Write-back count:** the backend strips `writeback.written`, so `pipeline.writeback.written` is null when the backend is the source. Use `pipeline.writeback.yieldPredictions` (the broker count) for "N written".
+- **Insights (`src/server/insights.ts`):** `GET /api/insights/*` are whitelisted pass-throughs to the inference service's `/insights/*` (contract §10.2). Unknown, repeated or malformed parameters give 400 before any upstream call. Upstream 404 stays 404, 422 becomes 400 and a missing outputs file is 503. The cache key includes the model version and file stamps from `/insights/meta`, so a pipeline rerun shows up within a minute. `POST /api/insights/what-if` takes exactly `{parcelId, crop, weather, year, irrigation}` (≤ 2 KB, JSON), maps them to the model's codes and calls `POST /insights/what-if`, falling back to `POST /predict/field` on an older service. It allows 20 runs a minute per client and 2 upstream calls at once (429 beyond that).
 - **Dev only:** `POST /api/cache/clear` clears the server cache.
 
 ## Checks

@@ -21,7 +21,7 @@ export function FarmFinder() {
   }, [farms.data, q, region]);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       <PageHeader title="Find a farm" subtitle="Pick a farm to see its contract facts, parcels, live yield estimates and local weather." />
       <Panel
         title="All farms"
