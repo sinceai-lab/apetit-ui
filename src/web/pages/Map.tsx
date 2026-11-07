@@ -7,7 +7,7 @@ import { deltaColor, DeltaLegend } from "../charts";
 import { api } from "../lib/api";
 import { cn } from "../lib/cn";
 import { cropLabel, fmtDate, fmtHa, fmtNum, fmtTHa, regionLabel } from "../lib/format";
-import { useRegion } from "../lib/prefs";
+import { useMapStyle, useRegion } from "../lib/prefs";
 import { href, setQuery } from "../lib/router";
 import { POLL, useApi } from "../lib/usePoll";
 import { boundsOf, L, mapInk, useLeaflet, type BasemapStyle } from "./map/useLeaflet";
@@ -26,7 +26,7 @@ function LiveMapPage({ query }: PageProps) {
   const [region] = useRegion();
   const crop = ((CROPS as string[]).includes(query.get("crop") ?? "") ? query.get("crop") : "all") as CropFilter;
   const [layers, setLayers] = useState({ cells: true, predicted: true, other: false, farms: false, fields: true, basemap: true });
-  const [style, setStyle] = useState<BasemapStyle>("map");
+  const [style, setStyle] = useMapStyle();
   const [sel, setSel] = useState<Sel>(null);
   const focusParcel = query.get("parcel");
 

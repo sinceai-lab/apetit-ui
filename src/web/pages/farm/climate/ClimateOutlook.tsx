@@ -62,7 +62,7 @@ function FarmClimateBody({ d }: { d: InsightsFarm }) {
   const other: Story = d.story === "below_2c" ? "current_policies" : "below_2c";
   return (
     <div className="flex flex-col gap-5">
-      <InsightPanel title={`${cropLabel(d.crop)} Scenario: ${story(d.story).label}`} basis={d.basis ?? null}>
+      <InsightPanel title={`${cropLabel(d.crop)} – ${story(d.story).label} Scenario`} basis={d.basis ?? null}>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
           <Stat label="Yield change for this farm" value={<ChangeText value={h.yieldChange} size="xl" />} foot={`${story(other).label}: ${fmtChange(h.yieldChangeOtherStory)} · whole region: ${fmtChange(h.regionYieldChange)}`} />
           <Stat label="On sand or fine sand" value={fmtShare(h.dryShare)} foot={`${fmtNum(h.dryFields)} of ${fmtNum(h.nFields)} fields hold the least water`} />

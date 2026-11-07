@@ -1,13 +1,16 @@
-// App-wide preferences: region switch (Finland/Sweden/Both) and light/dark theme, kept per viewer.
+// App-wide preferences: region switch (Finland/Sweden/Both), light/dark theme and map basemap style, kept per viewer.
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import type { RegionFilter } from "@/shared/types";
 
 type Theme = "light" | "dark";
+type MapStyle = "map" | "satellite";
 interface Prefs {
   region: RegionFilter;
   setRegion: (r: RegionFilter) => void;
   theme: Theme;
   toggleTheme: () => void;
+  mapStyle: MapStyle;
+  setMapStyle: (s: MapStyle) => void;
 }
 
 const Ctx = createContext<Prefs | null>(null);
@@ -45,7 +48,12 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
       return n;
     });
   }, []);
-  return <Ctx.Provider value={{ region, setRegion, theme, toggleTheme }}>{children}</Ctx.Provider>;
+  const [mapStyle, setMapStyleState] = useState<MapStyle>(() => (read("apetit.mapStyle") === "satellite" ? "satellite" : "map"));
+  const setMapStyle = useCallback((s: MapStyle) => {
+    setMapStyleState(s);
+    write("apetit.mapStyle", s);
+  }, []);
+  return <Ctx.Provider value={{ region, setRegion, theme, toggleTheme, mapStyle, setMapStyle }}>{children}</Ctx.Provider>;
 }
 
 export function usePrefs(): Prefs {
@@ -56,5 +64,9 @@ export function usePrefs(): Prefs {
 export const useRegion = () => {
   const { region, setRegion } = usePrefs();
   return [region, setRegion] as const;
+};
+export const useMapStyle = () => {
+  const { mapStyle, setMapStyle } = usePrefs();
+  return [mapStyle, setMapStyle] as const;
 };
 export const useIsDark = () => usePrefs().theme === "dark";

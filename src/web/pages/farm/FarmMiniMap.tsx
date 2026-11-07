@@ -1,13 +1,14 @@
 // Small map of one farm: its parcels (contract ones coloured by Δ), the farm point and its weather cell.
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Map as MapIcon, Satellite } from "lucide-react";
 import type { Cell, Farm, Parcel, Prediction } from "@/shared/types";
 import { deltaColor } from "../../charts";
 import { Segmented } from "../../components/ui";
 import { boundsOf, L, mapInk, useLeaflet, type BasemapStyle } from "../map/useLeaflet";
+import { useMapStyle } from "../../lib/prefs";
 
 export function FarmMiniMap({ farm, parcels, preds, cell }: { farm: Farm; parcels: Parcel[]; preds: Prediction[]; cell: Cell | null }) {
-  const [style, setStyle] = useState<BasemapStyle>("map");
+  const [style, setStyle] = useMapStyle();
   const sat = style === "satellite";
   const { ref, map, renderer, dark, tilesFailed } = useLeaflet({ style });
 
