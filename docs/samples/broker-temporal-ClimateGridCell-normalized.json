@@ -1,0 +1,148 @@
+{
+ "id": "urn:ngsi-ld:ClimateGridCell:GF0104",
+ "type": "ClimateGridCell",
+ "cell_id": [
+  {
+   "type": "Property",
+   "value": "GF0104",
+   "instanceId": "urn:ngsi-ld:Instance:edd22869-5fef-4829-8f9d-43efb779560f",
+   "refLoadLog": {
+    "type": "Relationship",
+    "object": "urn:ngsi-ld:LoadLog:1794061142861-d321f74c"
+   }
+  }
+ ],
+ "precip_mm": [
+  {
+   "type": "Property",
+   "value": {
+    "historical": 34.6
+   },
+   "observedAt": "2026-11-01T00:00:00Z",
+   "instanceId": "urn:ngsi-ld:Instance:5bf5fa62-bc08-4931-8eae-9b546b1d34c3",
+   "unitCode": "MMT",
+   "refLoadLog": {
+    "type": "Relationship",
+    "object": "urn:ngsi-ld:LoadLog:1794061257659-0d019948"
+   }
+  },
+  {
+   "type": "Property",
+   "value": {
+    "historical": 42.9
+   },
+   "observedAt": "2026-12-01T00:00:00Z",
+   "instanceId": "urn:ngsi-ld:Instance:2b076bf5-493f-4b1f-b5bc-2c834ecf1ec7",
+   "unitCode": "MMT",
+   "refLoadLog": {
+    "type": "Relationship",
+    "object": "urn:ngsi-ld:LoadLog:1794061257659-0d019948"
+   }
+  },
+  {
+   "type": "Property",
+   "value": {
+    "ssp126": 10.3,
+    "ssp245": 46.8,
+    "ssp585": 100.5
+   },
+   "observedAt": "2027-01-01T00:00:00Z",
+   "instanceId": "urn:ngsi-ld:Instance:9f95117b-97df-48c7-b1b5-28a423e084b2",
+   "unitCode": "MMT",
+   "refLoadLog": {
+    "type": "Relationship",
+    "object": "urn:ngsi-ld:LoadLog:1794061257659-0d019948"
+   }
+  },
+  {
+   "type": "Property",
+   "value": {
+    "ssp126": 29.7,
+    "ssp245": 22.5,
+    "ssp585": 37.9
+   },
+   "observedAt": "2027-02-01T00:00:00Z",
+   "instanceId": "urn:ngsi-ld:Instance:cf76d004-dcf5-4170-bf4c-d7e8cb0a8586",
+   "unitCode": "MMT",
+   "refLoadLog": {
+    "type": "Relationship",
+    "object": "urn:ngsi-ld:LoadLog:1794061257659-0d019948"
+   }
+  }
+ ],
+ "tmean_c": [
+  {
+   "type": "Property",
+   "value": {
+    "historical": 4.38
+   },
+   "observedAt": "2026-11-01T00:00:00Z",
+   "instanceId": "urn:ngsi-ld:Instance:95692a27-6135-4fc5-9ed1-9c93435b74fb",
+   "unitCode": "CEL",
+   "refLoadLog": {
+    "type": "Relationship",
+    "object": "urn:ngsi-ld:LoadLog:1794061257659-0d019948"
+   }
+  },
+  {
+   "type": "Property",
+   "value": {
+    "historical": 0.84
+   },
+   "observedAt": "2026-12-01T00:00:00Z",
+   "instanceId": "urn:ngsi-ld:Instance:da97d17a-ce48-4670-aca7-9a7b8aed631d",
+   "unitCode": "CEL",
+   "refLoadLog": {
+    "type": "Relationship",
+    "object": "urn:ngsi-ld:LoadLog:1794061257659-0d019948"
+   }
+  },
+  {
+   "type": "Property",
+   "value": {
+    "ssp126": -3.76,
+    "ssp245": -5.47,
+    "ssp585": -4.27
+   },
+   "observedAt": "2027-01-01T00:00:00Z",
+   "instanceId": "urn:ngsi-ld:Instance:d0efa3ec-3287-4df9-9eb8-72ac5629bc5b",
+   "unitCode": "CEL",
+   "refLoadLog": {
+    "type": "Relationship",
+    "object": "urn:ngsi-ld:LoadLog:1794061257659-0d019948"
+   }
+  },
+  {
+   "type": "Property",
+   "value": {
+    "ssp126": -7.77,
+    "ssp245": -1.81,
+    "ssp585": -2.81
+   },
+   "observedAt": "2027-02-01T00:00:00Z",
+   "instanceId": "urn:ngsi-ld:Instance:d4ae37c8-1be8-4471-8dbe-1f65c1e9b42b",
+   "unitCode": "CEL",
+   "refLoadLog": {
+    "type": "Relationship",
+    "object": "urn:ngsi-ld:LoadLog:1794061257659-0d019948"
+   }
+  }
+ ],
+ "location": [
+  {
+   "type": "GeoProperty",
+   "value": {
+    "type": "Point",
+    "coordinates": [
+     22.625,
+     60.975
+    ]
+   },
+   "instanceId": "urn:ngsi-ld:Instance:80764c65-3e48-40c8-9483-1208ce8ce5f6",
+   "refLoadLog": {
+    "type": "Relationship",
+    "object": "urn:ngsi-ld:LoadLog:1794061142861-d321f74c"
+   }
+  }
+ ]
+}

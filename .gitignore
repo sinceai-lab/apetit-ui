@@ -1,0 +1,12 @@
+node_modules
+dist
+out
+.env
+.env.*
+!.env.example
+*.tgz
+coverage
+.DS_Store
+*.tsbuildinfo
+*.log
+docs/screenshots/*.tmp

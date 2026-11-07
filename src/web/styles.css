@@ -1,0 +1,283 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Apetit tokens, aligned with apetit.com (white, #3d3d3d text, #67b52c green, Heebo/Lexend/Roboto).
+   --brand #467b1e: white text on it is 5.11:1 and it is 5.11:1 as text on white (site #67b52c is only 2.55:1),
+   so it carries text, links and buttons; --brand-vivid #67b52c is for fills, icons, rules and focus rings. */
+:root {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f8f9fa;
+  --border: #dee2e6;
+  --text: #3d3d3d;
+  --heading: #1d1d1b;
+  --muted: #5c636a;
+  --brand: #467b1e;
+  --brand-vivid: #67b52c;
+  --brand-strong: #355e17;
+  --brand-soft: #eef6e7;
+  --brand-contrast: #ffffff;
+  --rapeseed: #e3b21b;
+  --rapeseed-soft: #fbf0c6;
+  --pea: #7db043;
+  --berry: #a3324b;
+  --berry-soft: #f7e4e8;
+  --focus: #67b52c;
+  --focus-ring: rgb(103 181 44 / 0.263);
+  --footer-bg: #3d3d3d;
+  --footer-text: #ffffff;
+  --shadow: none;
+
+  --status-up: #2e7d4f;
+  --status-degraded: #b7791f;
+  --status-down: #b3261e;
+  --status-unknown: var(--muted);
+
+  --viz-pea: #4e9a3a;
+  --viz-turnip_rape: #d29e00;
+  --viz-potato: #7e57a6;
+  --viz-carrot: #e07020;
+  --viz-spinach: #1e6e73;
+  --viz-other: #8c8678;
+
+  --viz-below-2: #a6611a;
+  --viz-below-1: #dfc27d;
+  --viz-neutral: #ede7d9;
+  --viz-above-1: #80cdc1;
+  --viz-above-2: #01665e;
+  --viz-estimate: var(--brand);
+  --viz-baseline: var(--muted);
+
+  --viz-temp: #c2552d;
+  --viz-precip: #3b7ea1;
+  --viz-et0: #d29e00;
+  --viz-historical: #8c8678;
+  --viz-ssp126: #5b9bc4;
+  --viz-ssp245: #d9822b;
+  --viz-ssp585: #9c2f1b;
+
+  --viz-observed: var(--brand);
+  --viz-filled-gap: var(--rapeseed);
+  --viz-filled-ahead: var(--border);
+  --viz-grid: #e9ecef;
+  --viz-axis: #adb5bd;
+
+  --font-sans: "Heebo", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-title: "Lexend", "Heebo", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Roboto", "Heebo", ui-sans-serif, system-ui, sans-serif;
+  --radius: 5px;
+}
+
+/* Dark mode (the site has none): neutral near-black greys, lighter brand green with dark text on fills. */
+.dark {
+  --bg: #121212;
+  --surface: #1b1c1b;
+  --surface-2: #232523;
+  --border: #34373a;
+  --text: #e6e6e3;
+  --heading: #f5f5f2;
+  --muted: #a4a9ad;
+  --brand: #7cc443;
+  --brand-vivid: #67b52c;
+  --brand-strong: #a3d97a;
+  --brand-soft: #1e2a16;
+  --brand-contrast: #0f1a08;
+  --rapeseed: #f1c84b;
+  --rapeseed-soft: #3a3214;
+  --pea: #98c865;
+  --berry: #e58ba0;
+  --berry-soft: #3a1f26;
+  --focus: #7cc443;
+  --focus-ring: rgb(124 196 67 / 0.3);
+  --footer-bg: #0c0c0c;
+  --footer-text: #e6e6e3;
+  --shadow: none;
+
+  --status-up: #5fbf85;
+  --status-degraded: #e3b04b;
+  --status-down: #f07a70;
+
+  --viz-pea: #7cc266;
+  --viz-turnip_rape: #e8be3a;
+  --viz-potato: #b394d8;
+  --viz-carrot: #f29a55;
+  --viz-spinach: #4fb3b8;
+  --viz-neutral: #3a3a33;
+  --viz-grid: #2a2c2e;
+  --viz-axis: #50555a;
+}
+
+/* Squarer corners like apetit.com (Bootstrap .25rem-5px) for every rounded-lg/xl/2xl in the app. */
+@theme {
+  --radius-lg: 5px;
+  --radius-xl: 6px;
+  --radius-2xl: 8px;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-ink: var(--text);
+  --color-heading: var(--heading);
+  --color-muted: var(--muted);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-vivid: var(--brand-vivid);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-contrast: var(--brand-contrast);
+  --color-rapeseed: var(--rapeseed);
+  --color-rapeseed-soft: var(--rapeseed-soft);
+  --color-pea: var(--pea);
+  --color-berry: var(--berry);
+  --color-berry-soft: var(--berry-soft);
+  --color-focus: var(--focus);
+  --color-footer: var(--footer-bg);
+  --color-footer-ink: var(--footer-text);
+  --color-up: var(--status-up);
+  --color-degraded: var(--status-degraded);
+  --color-down: var(--status-down);
+  --font-sans: var(--font-sans);
+  --font-title: var(--font-title);
+  --font-heading: var(--font-heading);
+  --radius-card: var(--radius);
+  --shadow-card: var(--shadow);
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  * {
+    border-color: var(--border);
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+  .tnum,
+  table,
+  svg text {
+    font-variant-numeric: tabular-nums;
+  }
+  h1,
+  .font-title {
+    font-family: var(--font-title);
+    font-weight: 600;
+    color: var(--heading);
+  }
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .font-display {
+    font-family: var(--font-heading);
+  }
+}
+
+@layer components {
+  /* Site buttons: green fill, white text, 5px radius, 300ms linear. Hover fades to .85 (site uses .7,
+     which would drop white-on-green to 2.9:1; .85 keeps 3.8:1 for the transient state). */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    border-radius: var(--radius);
+    font-weight: 500;
+    transition: all 300ms linear;
+  }
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .btn-primary {
+    background: var(--brand);
+    color: var(--brand-contrast);
+    border: 1px solid var(--brand);
+  }
+  .btn-primary:hover {
+    opacity: 0.85;
+  }
+  /* Inverse/outline: white fill, green text and border (the site's inverse button). */
+  .btn-outline {
+    background: var(--surface);
+    color: var(--brand);
+    border: 1px solid var(--brand-vivid);
+  }
+  .btn-outline:hover {
+    background: var(--brand-soft);
+    border-color: var(--brand);
+  }
+  /* Site form focus: green border + soft green ring. */
+  .field {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    transition: border-color 150ms ease-in-out, box-shadow 150ms ease-in-out;
+  }
+  .field:focus,
+  .field:focus-visible {
+    outline: none;
+    border-color: var(--focus);
+    box-shadow: 0 0 0 0.2rem var(--focus-ring);
+  }
+  .link {
+    color: var(--brand);
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 300ms linear;
+  }
+  .link:hover {
+    color: var(--brand-strong);
+  }
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--brand);
+  }
+}
+
+/* Hatched fill for "filled ahead" (model fills the rest of the season with climate normals). */
+.hatch {
+  background-image: repeating-linear-gradient(135deg, var(--border) 0 3px, transparent 3px 6px);
+}
+
+.leaflet-container {
+  background: var(--surface-2);
+  font-family: var(--font-sans);
+}
+.leaflet-container {
+  isolation: isolate;
+}
+.dark .leaflet-bar a,
+.dark .leaflet-control-attribution {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+.dark .leaflet-control-attribution a {
+  color: var(--brand);
+}

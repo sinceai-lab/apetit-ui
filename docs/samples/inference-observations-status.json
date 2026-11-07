@@ -1,0 +1,55 @@
+{
+ "seasons": [
+  {
+   "cell_id": "GF0000",
+   "year": 2027,
+   "stored_days": 245,
+   "in_window_days": 241,
+   "first_date": "2027-03-01",
+   "last_date": "2027-10-31",
+   "duplicates": 0,
+   "corrections": 0,
+   "pet_derived_days": 0,
+   "last_received_at": "2026-11-07T15:58:10+00:00",
+   "observed_days": 241,
+   "partial_days": 0,
+   "filled_days": 0,
+   "filled_gap_days": 0,
+   "filled_future_days": 0,
+   "total_days": 241,
+   "last_observed_doy": 300,
+   "label": "estimate",
+   "missing_doys_before_last": [],
+   "contract_parcels": 0
+  },
+  {
+   "cell_id": "GF0001",
+   "year": 2027,
+   "stored_days": 245,
+   "in_window_days": 241,
+   "first_date": "2027-03-01",
+   "last_date": "2027-10-31",
+   "duplicates": 0,
+   "corrections": 0,
+   "pet_derived_days": 0,
+   "last_received_at": "2026-11-07T15:58:10+00:00",
+   "observed_days": 241,
+   "partial_days": 0,
+   "filled_days": 0,
+   "filled_gap_days": 0,
+   "filled_future_days": 0,
+   "total_days": 241,
+   "last_observed_doy": 300,
+   "label": "estimate",
+   "missing_doys_before_last": [],
+   "contract_parcels": 17
+  }
+ ],
+ "recent_rejected": [],
+ "counters": {
+  "notifications": 43,
+  "readings_new": 20580,
+  "readings_out_of_season": 336,
+  "readings_duplicate": 5
+ }
+}
