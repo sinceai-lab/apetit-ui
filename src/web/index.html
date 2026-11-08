@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="color-scheme" content="light dark" />
+    <meta name="color-scheme" content="light" />
     <link rel="icon" type="image/png" sizes="32x32" href="./assets/brand/a-mark-32x32.png" />
     <link rel="icon" type="image/png" sizes="192x192" href="./assets/brand/a-mark-192x192.png" />
     <link rel="apple-touch-icon" href="./assets/brand/a-mark-180x180.png" />
@@ -16,7 +16,7 @@
     <script>
       try {
         var t = localStorage.getItem("apetit.theme");
-        var dark = t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+        var dark = t === "dark";
         if (dark) document.documentElement.classList.add("dark");
       } catch (e) {}
     </script>
